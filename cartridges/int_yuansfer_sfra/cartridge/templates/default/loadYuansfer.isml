@@ -1,0 +1,18 @@
+<isset name="yuansferHelper" value="${require('*/cartridge/scripts/yuansfer/helpers/yuansferHelper')}" scope="page" />
+<isset name="yuansferEnabled" value="${yuansferHelper.isYuansferEnabled()}" scope="page" />
+<isset name="yuansferScriptURL" value="${yuansferHelper.getYuansferScriptUrl()}" scope="page" />
+<isset name="yuansferMerchantNo" value="${yuansferHelper.getYuansferMerchantNo()}" scope="page" />
+<isset name="yuansferEnv" value="${yuansferHelper.getYuansferEnv()}" scope="page" />
+<isset name="yuansferStoreNo" value="${yuansferHelper.getYuansferStoreNo()}" scope="page" />
+<isset name="yuansferToken" value="${yuansferHelper.getYuansferToken()}" scope="page" />
+<isset name="yuansferCheckoutHelper" value="${require('*/cartridge/scripts/yuansfer/helpers/checkoutHelper')}" scope="page" />
+
+<isif condition="${yuansferEnabled}">
+	<script type="text/javascript" src="${yuansferScriptURL}"></script>
+	<isif condition="${yuansferMerchantNo}">
+		<input type="hidden" id="yuansferMerchantNo" value="${yuansferMerchantNo}" />
+		<input type="hidden" id="yuansferEnv" value="${yuansferEnv}" />
+		<input type="hidden" id="yuansferStoreNo" value="${yuansferStoreNo}" />
+		<input type="hidden" id="yuansferToken" value="${yuansferToken}" />
+	</isif>
+</isif>

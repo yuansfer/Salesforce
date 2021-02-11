@@ -1,0 +1,17 @@
+<div class="tab-pane ${paymentOption.ID}-content" id="${paymentOption.ID}-content" role="tabpanel">
+    <fieldset class="payment-form-fields">
+    
+    	<input type="hidden" class="form-control" name="${pdict.forms.billingForm.paymentMethod.htmlName}"
+            value="${paymentOption.ID}">
+        <input type="hidden" name="yuansfer_wechat_qrcode_url" id="yuansfer_wechat_qrcode_url">
+
+		<div class="row">
+            <div class="col-12">
+            	<p>${Resource.msg('wechatpay.qrcodemessage', 'yuansfer',null)}</p>
+            </div>
+        </div>
+        <div class="row">
+            wechat test
+        </div>
+    </fieldset>
+</div>

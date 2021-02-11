@@ -1,0 +1,4 @@
+<div class="credit-card-type">
+    <span>${Resource.msg('payment.pay.with', 'yuansfer', null)}
+    ${dw.order.PaymentMgr.getPaymentMethod(payment.paymentMethod).name}</span>
+</div>

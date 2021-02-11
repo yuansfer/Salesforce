@@ -1,0 +1,69 @@
+<isset name="yuansferCheckoutHelper" value="${require('*/cartridge/scripts/yuansfer/helpers/checkoutHelper')}" scope="page" />
+<isset name="yuansferHelper" value="${require('*/cartridge/scripts/yuansfer/helpers/yuansferHelper')}" scope="page" />
+<isset name="yuansferEnabled" value="${yuansferHelper.isYuansferEnabled()}" scope="page" />
+
+<isif condition="${yuansferEnabled}">
+    <isscript>
+        var assets = require('*/cartridge/scripts/assets.js');
+        assets.addJs('/js/yuansfer.checkout.js');
+    </isscript>
+</isif>
+<input type="hidden" id="yuansferAccountCountry" value="${yuansferCheckoutHelper.getPRCountry()}" />
+<input type="hidden" id="beforePaymentAuthURL" value="${URLUtils.https('YuansferPayments-BeforePaymentAuthorization')}" />
+<input type="hidden" id="getYuansferOrderItemsURL" value="${URLUtils.https('YuansferPayments-GetYuansferOrderItems')}" />
+<input type="hidden" id="billingPageUrl" value="${URLUtils.url('Checkout-Begin', 'stage', 'payment')}" />
+
+<input type="hidden" name="yuansfer_source_client_secret" id="yuansfer_source_client_secret">
+<input type="hidden" name="yuansfer_redirect_url" id="yuansfer_redirect_url">
+
+<isset name="yuansferOrder" value="${require('*/cartridge/scripts/yuansfer/helpers/checkoutHelper').getYuansferOrderDetails(dw.order.BasketMgr.getCurrentBasket())}" scope="page" />
+
+<input type="hidden" id="yuansfer_order_amount" value="${yuansferOrder.amount}">
+<input type="hidden" id="yuansfer_order_currency" value="${yuansferOrder.currency}">
+<input type="hidden" id="yuansfer_site_id" value="${require('*/cartridge/scripts/yuansfer/helpers/checkoutHelper').getSiteID()}">
+<input type="hidden" id="yuansfer_order_number" value="${require('*/cartridge/scripts/yuansfer/helpers/checkoutHelper').getNewYuansferOrderNumber()}">
+<input type="hidden" id="yuansfer_return_url" value="${URLUtils.https("YuansferPayments-HandleAPM")}">
+
+<input type="hidden" id="yuansfer_order_items" value="${yuansferOrder.order_items}">
+
+<input type="hidden" id="yuansfer_site_locale" value="${require('*/cartridge/scripts/yuansfer/helpers/checkoutHelper').getSiteLocale()}">
+
+
+<isloop items="${pdict.order.billing.payment.applicablePaymentMethods}" var="paymentOption">
+
+    <isif condition="${paymentOption.ID === 'CREDIT_CARD'}">
+        <isif condition="${yuansferEnabled}">
+            <div class="tab-pane active ${paymentOption.ID}-content" id="${paymentOption.ID}-content" role="tabpanel">
+                <fieldset class="payment-form-fields">
+
+                    <input type="hidden" class="form-control"
+                        name="${pdict.forms.billingForm.paymentMethod.htmlName}"
+                        value="${paymentOption.ID}"
+                    >
+                    <input type="hidden" name="cardNumber" value="" class="cardNumber" id="cardNumber">
+                    <input type="hidden" name="yuansfer_source_id" id="yuansfer_source_id">
+                    <isinclude template="yuansfer/checkout/billing/sfra_cardform" />
+                </fieldset>
+            </div>
+        <iselse/>
+            <isinclude template="checkout/billing/paymentOptions/creditCardContent" />
+        </isif>
+    
+    <iselseif condition="${paymentOption.ID === 'YUANSFER_ALIPAY'}"/>
+        <isinclude template="checkout/billing/paymentOptions/alipayContent" />
+	<iselseif condition="${paymentOption.ID === 'YUANSFER_WECHATPAY'}"/>
+        <isinclude template="checkout/billing/paymentOptions/wechatContent" />
+    <iselse/>
+
+        <div class="tab-pane ${paymentOption.ID}-content" id="${paymentOption.ID}-content" role="tabpanel">
+            <fieldset class="payment-form-fields">
+
+                <input type="hidden" class="form-control"
+                    name="${pdict.forms.billingForm.paymentMethod.htmlName}"
+                    value="${paymentOption.ID}"
+                >
+                <input type="hidden" name="yuansfer_source_id" id="yuansfer_source_id">
+            </fieldset>
+        </div>
+    </isif>
+</isloop>
