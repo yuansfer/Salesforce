@@ -87,10 +87,10 @@ function beforePaymentAuthorization() {
                     source: stripePaymentInstrument.custom.stripeBankAccountTokenId
                 });
 
-                let stripeCustomerId = newStripeCustomer.id;
+                let yuansferCustomerID = newStripeCustomer.id;
 
                 Transaction.wrap(function () {
-                    basket.custom.stripeCustomerID = stripeCustomerId;
+                    basket.custom.yuansferCustomerID = yuansferCustomerID;
                     basket.custom.stripeBankAccountToken = stripePaymentInstrument.custom.stripeBankAccountToken;
                     basket.custom.stripeIsPaymentIntentInReview = true;
                 });

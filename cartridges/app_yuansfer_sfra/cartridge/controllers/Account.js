@@ -7,9 +7,9 @@ var page = module.superModule;
 server.extend(page);
 
 server.append('Show', function (req, res, next) {
-    var stripeHelper = require('*/cartridge/scripts/stripe/helpers/stripeHelper');
-    if (stripeHelper.isStripeEnabled()) {
-        var wallet = stripeHelper.getStripeWallet(customer);
+    var yuansferHelper = require('*/cartridge/scripts/yuansfer/helpers/yuansferHelper');
+    if (yuansferHelper.isYuansferEnabled()) {
+        var wallet = yuansferHelper.getYuansferWallet(customer);
         var paymentInstruments = wallet.getPaymentInstruments();
         var viewData = res.getViewData();
         if (paymentInstruments && paymentInstruments.length > 0) {

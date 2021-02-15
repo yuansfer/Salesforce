@@ -52,7 +52,15 @@
     <iselseif condition="${paymentOption.ID === 'YUANSFER_ALIPAY'}"/>
         <isinclude template="checkout/billing/paymentOptions/alipayContent" />
 	<iselseif condition="${paymentOption.ID === 'YUANSFER_WECHATPAY'}"/>
-        <isinclude template="checkout/billing/paymentOptions/wechatContent" />
+        <isinclude template="checkout/billing/paymentOptions/wechatpayContent" />
+    <iselseif condition="${paymentOption.ID === 'YUANSFER_GCASH'}"/>
+        <isinclude template="checkout/billing/paymentOptions/gcashContent" />
+    <iselseif condition="${paymentOption.ID === 'YUANSFER_DANA'}"/>
+        <isinclude template="checkout/billing/paymentOptions/danaContent" />
+    <iselseif condition="${paymentOption.ID === 'YUANSFER_ALIPAYHK'}"/>
+        <isinclude template="checkout/billing/paymentOptions/alipayhkContent" />
+    <iselseif condition="${paymentOption.ID === 'YUANSFER_KAKAOPAY'}"/>
+        <isinclude template="checkout/billing/paymentOptions/kakaopayContent" />
     <iselse/>
 
         <div class="tab-pane ${paymentOption.ID}-content" id="${paymentOption.ID}-content" role="tabpanel">

@@ -13,15 +13,7 @@ var PaymentStatusCodes = require('dw/order/PaymentStatusCodes');
 var Resource = require('dw/web/Resource');
 var Transaction = require('dw/system/Transaction');
 
-var StripeAPMHelper = require('*/cartridge/scripts/stripe/helpers/paymentprocessors/stripeApmHelper');
-
-/**
- * Creates a token. This should be replaced by utilizing a tokenization provider
- * @returns {string} a token
- */
-function createToken() {
-    return Math.random().toString(36).substr(2);
-}
+var YuansferAPMHelper = require('*/cartridge/scripts/stripe/helpers/paymentprocessors/yuansferApmHelper');
 
 /**
  * Verifies that entered credit card information is a valid card. If the information is valid a
@@ -33,7 +25,7 @@ function createToken() {
 function Handle(basket, paymentInformation) {
     var serverErrors = [];
 
-    var result = StripeAPMHelper.Handle({ Basket: basket });
+    var result = YuansferAPMHelper.Handle({ Basket: basket });
     if (result.errorMessage) {
         serverErrors.push(result.errorMessage);
     }
@@ -53,7 +45,7 @@ function Authorize(orderNumber, paymentInstrument, paymentProcessor) {
     var serverErrors = [];
     var order = dw.order.OrderMgr.getOrder(orderNumber);
 
-    var result = StripeAPMHelper.Authorize({ Order: order, OrderNo: orderNumber, PaymentInstrument: paymentInstrument });
+    var result = YuansferAPMHelper.Authorize({ Order: order, OrderNo: orderNumber, PaymentInstrument: paymentInstrument });
 
     if (result.errorMessage) {
         serverErrors.push(result.errorMessage);

@@ -84,15 +84,15 @@ function getStripeAPMPaymentInstrument(order) {
  * @param {dw.order.Order} order - Order to get Stripe customer ID from
  * @returns {string} - Stripe customer ID if available or null;
  */
-function getStripeCustomerIdFromOrder(order) {
+function getYuansferCustomerIDFromOrder(order) {
     const orderCustomer = order.getCustomer();
-    var stripeCustomerId = null;
+    var yuansferCustomerID = null;
 
-    if (orderCustomer && orderCustomer.profile && ('stripeCustomerID' in orderCustomer.profile.custom) && orderCustomer.profile.custom.stripeCustomerID) {
-        stripeCustomerId = orderCustomer.profile.custom.stripeCustomerID;
+    if (orderCustomer && orderCustomer.profile && ('yuansferCustomerID' in orderCustomer.profile.custom) && orderCustomer.profile.custom.yuansferCustomerID) {
+        yuansferCustomerID = orderCustomer.profile.custom.yuansferCustomerID;
     }
 
-    return stripeCustomerId;
+    return yuansferCustomerID;
 }
 
 /**
@@ -113,10 +113,10 @@ function createCharge(stripeNotificationObject, order, stripePaymentInstrument) 
     };
 
     if (stripePaymentInstrument.paymentMethod !== 'STRIPE_WECHATPAY') {
-        var stripeCustomerId = stripePaymentInstrument.custom.stripeCustomerID || getStripeCustomerIdFromOrder(order);
+        var yuansferCustomerID = stripePaymentInstrument.custom.yuansferCustomerID || getYuansferCustomerIDFromOrder(order);
 
-        if (stripeCustomerId) {
-            createChargePayload.customer = stripeCustomerId;
+        if (yuansferCustomerID) {
+            createChargePayload.customer = yuansferCustomerID;
         }
     }
 

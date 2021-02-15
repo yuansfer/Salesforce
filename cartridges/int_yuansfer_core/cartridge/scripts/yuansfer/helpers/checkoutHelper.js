@@ -3,6 +3,7 @@
 /* global session, customer, dw, empty, request */
 
 'use strict';
+var yuansferHelper = require('*/cartridge/scripts/yuansfer/helpers/yuansferHelper');
 
 /**
  * Returns the country for Payment Request button from Site Preferences.
@@ -74,36 +75,36 @@ function isYuansferPaymentInstrument(paymentInstrument) {
  * Check if customer cards should always be saved for guest customers
  * @returns {boolean} true if customer cards always should be saved
  */
-function shouldAlwaysSaveGuessCustomerCards() {
-    return dw.system.Site.getCurrent().getCustomPreferenceValue('stripeSaveCustomerCards').value === 'always';
+function shouldAlwaysSaveGuestCustomerCards() {
+    return dw.system.Site.getCurrent().getCustomPreferenceValue('yuansferSaveCustomerCards').value === 'always';
 }
 
 /**
  * Check if customer should be asked before save cards on Stripe side
  * @returns {boolean} true customer should be asked before save cards on Stripe side
  */
-function shouldAskBeforeSaveGuessCustomerCards() {
-    return dw.system.Site.getCurrent().getCustomPreferenceValue('stripeSaveCustomerCards').value === 'ask';
+function shouldAskBeforeSaveGuestCustomerCards() {
+    return dw.system.Site.getCurrent().getCustomPreferenceValue('yuansferSaveCustomerCards').value === 'ask';
 }
 
-exports.shouldAskBeforeSaveGuessCustomerCards = shouldAskBeforeSaveGuessCustomerCards;
+exports.shouldAskBeforeSaveGuestCustomerCards = shouldAskBeforeSaveGuestCustomerCards;
 
 /**
- * Gets the Stripe payment instrument created for a given line item container.
+ * Gets the Yuansfer payment instrument created for a given line item container.
  *
  * @param {dw.order.LineItemContainer} lineItemCtnr - Line item container
- * @return {dw.order.OrderPaymentInstruments} - Stripe payment instrument or null
+ * @return {dw.order.OrderPaymentInstruments} - Yuansfer payment instrument or null
  */
-function getStripePaymentInstrument(lineItemCtnr) {
+function getYuansferPaymentInstrument(lineItemCtnr) {
     const allPaymentInstruments = lineItemCtnr.paymentInstruments.toArray();
-    const stripePaymentInstruments = allPaymentInstruments.filter(isStripePaymentInstrument);
+    const yuansferPaymentInstruments = allPaymentInstruments.filter(isYuansferPaymentInstrument);
 
-    return stripePaymentInstruments.length ? stripePaymentInstruments[0] : null;
+    return yuansferPaymentInstruments.length ? yuansferPaymentInstruments[0] : null;
 }
 
-exports.getStripePaymentInstrument = getStripePaymentInstrument;
+exports.getYuansferPaymentInstrument = getYuansferPaymentInstrument;
 
-exports.removeStripePaymentInstruments = function (lineItemCtnr) {
+exports.removeYuansferPaymentInstruments = function (lineItemCtnr) {
     const iter = lineItemCtnr.paymentInstruments.iterator();
     var existingPI;
 
@@ -111,22 +112,22 @@ exports.removeStripePaymentInstruments = function (lineItemCtnr) {
     while (iter.hasNext()) {
         existingPI = iter.next();
 
-        if (isStripePaymentInstrument(existingPI)) {
+        if (isYuansferPaymentInstrument(existingPI)) {
             lineItemCtnr.removePaymentInstrument(existingPI);
         }
     }
 };
 
-exports.createStripePaymentInstrument = function (lineItemCtnr, paymentMethodId, params) {
-    exports.removeStripePaymentInstruments(lineItemCtnr);
+exports.createYuansferPaymentInstrument = function (lineItemCtnr, paymentMethodId, params) {
+    exports.removeYuansferPaymentInstruments(lineItemCtnr);
 
     const paymentInstrument = lineItemCtnr.createPaymentInstrument(paymentMethodId, this.getNonGiftCertificateAmount(lineItemCtnr));
 
-    const stripeService = require('*/cartridge/scripts/stripe/services/stripeService');
+    const yuansferService = require('*/cartridge/scripts/yuansfer/services/yuansferService');
 
     if (params) {
         if ('sourceId' in params) {
-            paymentInstrument.custom.stripeSourceID = params.sourceId;
+            paymentInstrument.custom.yuansferSourceID = params.sourceId;
         }
 
         if ('cardHolder' in params) {
@@ -149,116 +150,132 @@ exports.createStripePaymentInstrument = function (lineItemCtnr, paymentMethodId,
             paymentInstrument.creditCardExpirationYear = params.cardExpYear;
         }
 
-        if ('prUsed' in params) {
-            paymentInstrument.custom.stripePRUsed = params.prUsed;
+        if ('yuansferWeChatPayQRCodeURL' in params) {
+            paymentInstrument.custom.yuansferWeChatQRCodeURL = params.yuansferWeChatQRCodeURL;
         }
 
-        if ('bankAccountTokenId' in params) {
-            paymentInstrument.custom.stripeBankAccountTokenId = params.bankAccountTokenId;
+        if ('yuansferAlipayQRCodeURL' in params) {
+            paymentInstrument.custom.yuansferAlipayQRCodeURL = params.yuansferAlipayQRCodeURL;
         }
 
-        if ('bankAccountToken' in params) {
-            paymentInstrument.custom.stripeBankAccountToken = params.bankAccountToken;
+        if ('yuansferAlipayHKQRCodeURL' in params) {
+            paymentInstrument.custom.yuansferAlipayHKQRCodeURL = params.yuansferAlipayHKQRCodeURL;
         }
 
-        if ('stripeWeChatQRCodeURL' in params) {
-            paymentInstrument.custom.stripeWeChatQRCodeURL = params.stripeWeChatQRCodeURL;
+        if ('yuansferDanaQRCodeURL' in params) {
+            paymentInstrument.custom.yuansferDanaQRCodeURL = params.yuansferDanaQRCodeURL;
+        }
+
+        if ('yuansferGCashQRCodeURL' in params) {
+            paymentInstrument.custom.yuansferGCashQRCodeURL = params.yuansferGCashQRCodeURL;
+        }
+
+        if ('yuansferKakaoPayQRCodeURL' in params) {
+            paymentInstrument.custom.yuansferKakaoPayQRCodeURL = params.yuansferKakaoPayQRCodeURL;
         }
     }
 
-    if (session.privacy.stripeOrderNumber) {
+    if (session.privacy.yuansferOrderNumber) {
         const paymentTransaction = paymentInstrument.paymentTransaction;
-        paymentTransaction.custom.stripeOrderNumber = session.privacy.stripeOrderNumber;
+        paymentTransaction.custom.yuansferOrderNumber = session.privacy.yuansferOrderNumber;
     }
 
     if (customer.authenticated) {
-        let stripeCustomerId = customer.profile.custom.stripeCustomerID;
+        let yuansferCustomerID = customer.profile.custom.yuansferCustomerID;
 
         if (params.saveCard) {
-            if (!stripeCustomerId) {
-                const newStripeCustomer = stripeService.customers.create({
+            if (!yuansferCustomerID) {
+                const newYuansferCustomer = yuansferService.customers.create({
                     email: customer.profile.email,
                     name: customer.profile.firstName + ' ' + customer.profile.lastName
                 });
 
-                stripeCustomerId = newStripeCustomer.id;
-                customer.profile.custom.stripeCustomerID = stripeCustomerId;
+                yuansferCustomerID = newYuansferCustomer.id;
+                customer.profile.custom.yuansferCustomerID = yuansferCustomerID;
             }
 
-            paymentInstrument.custom.stripeSavePaymentInstrument = true;
+            paymentInstrument.custom.yuansferSavePaymentInstrument = true;
         }
 
-        if (stripeCustomerId) {
-            paymentInstrument.custom.stripeCustomerID = stripeCustomerId;
+        if (yuansferCustomerID) {
+            paymentInstrument.custom.yuansferCustomerID = yuansferCustomerID;
         }
     }
 
-    if (!customer.authenticated && (shouldAlwaysSaveGuessCustomerCards() || (shouldAskBeforeSaveGuessCustomerCards() && params.saveGuessCard))) {
+    if (!customer.authenticated && (shouldAlwaysSaveGuestCustomerCards() || (shouldAskBeforeSaveGuestCustomerCards() && params.saveGuestCard))) {
         const customerEmail = lineItemCtnr.getCustomerEmail();
 
-        const guessCustomerName = lineItemCtnr.getBillingAddress().getFullName();
+        const guestCustomerName = lineItemCtnr.getBillingAddress().getFullName();
 
-        const newStripeGuessCustomer = stripeService.customers.create({
+        const newYuansferGuestCustomer = yuansferService.customers.create({
             email: customerEmail,
-            name: guessCustomerName
+            name: guestCustomerName
         });
 
-        paymentInstrument.custom.stripeSavePaymentForReAuthorise = true;
+        paymentInstrument.custom.yuansferSavePaymentForReAuthorise = true;
 
-        paymentInstrument.custom.stripeSavePaymentInstrument = true;
+        paymentInstrument.custom.yuansferSavePaymentInstrument = true;
 
-        if (newStripeGuessCustomer && newStripeGuessCustomer.id) {
-            paymentInstrument.custom.stripeCustomerID = newStripeGuessCustomer.id;
+        if (newStripeGuestCustomer && newStripeGuestCustomer.id) {
+            paymentInstrument.custom.yuansferCustomerID = newYuansferGuestCustomer.id;
         }
     }
 
     if (paymentInstrument) {
-        delete lineItemCtnr.custom.stripeIsPaymentIntentInReview; // eslint-disable-line
+        delete lineItemCtnr.custom.yuansferIsPaymentIntentInReview; // eslint-disable-line
     }
 };
 
-exports.createPaymentIntent = function (paymentInstrument) {
-    const paymentMethod = paymentInstrument.custom.stripeSourceID;
+exports.initYuansfer = function () {
+    var yuansferHelper = require('*/cartridge/scripts/yuansfer/helpers/yuansferHelper');
+    const initYuansferPayload = {
 
-    var currentCurency = dw.util.Currency.getCurrency(paymentInstrument.paymentTransaction.amount.currencyCode);
-    var multiplier = Math.pow(10, currentCurency.getDefaultFractionDigits());
-    var amount = Math.round(paymentInstrument.paymentTransaction.amount.value * multiplier);
-    const stripeChargeCapture = dw.system.Site.getCurrent().getCustomPreferenceValue('stripeChargeCapture');
+    }
 
-    const currency = paymentInstrument.paymentTransaction.amount.currencyCode.toLowerCase();
+    const yuansferService = require('*/cartridge/scripts/yuansfer/services/yuansferService');
 
-    const createPaymentIntentPayload = {
-        payment_method: paymentMethod,
+    const securePay = yuansferService.securePay.create(createSecurePayPayload);
+}
+exports.createSecurePay = function (paymentInstrument) {
+
+    const amount = paymentInstrument.custom.yuansferSourceID;
+
+    // var currentCurency = dw.util.Currency.getCurrency(paymentInstrument.paymentTransaction.amount.currencyCode);
+    // var multiplier = Math.pow(10, currentCurency.getDefaultFractionDigits());
+    var amount = paymentInstrument.paymentTransaction.amount.value;
+
+    const currency = paymentInstrument.paymentTransaction.amount.currencyCode;
+    const reference =  yuansferHelper.getYuansferToken()+exports.getNewYuansferOrderNumber();
+    const createSecurePayPayload = {
+        vendor: paymentMethod,
         amount: amount,
         currency: currency,
-        confirmation_method: 'manual',
-        capture_method: stripeChargeCapture ? 'automatic' : 'manual',
-        confirm: true
+        settleCurrency: currency,
+        reference: reference,
+        ipnUrl: "http://zk-tys.yunkeguan.com/ttest/test",
+        callback:"http://zk-tys.yunkeguan.com/ttest/test2?status={status}",
+        description:"test",
+        note:"testnote",
+        terminal:"ONLINE",
+        goodsInfo:[
+            {
+                "goods_name": "name1",
+                "quantity": "quantity1"
+            }
+        ]
     };
 
-    if (paymentInstrument.custom.stripeCustomerID) {
-        createPaymentIntentPayload.customer = paymentInstrument.custom.stripeCustomerID;
-    }
+    const yuansferService = require('*/cartridge/scripts/yuansfer/services/yuansferService');
 
-    if (!stripeChargeCapture && paymentInstrument.custom.stripeSavePaymentInstrument) {
-        createPaymentIntentPayload.save_payment_method = true;
-    }
+    const securePay = yuansferService.securePay.create(createSecurePayPayload);
 
-    if (!stripeChargeCapture && paymentInstrument.custom.stripeSavePaymentForReAuthorise) {
-        createPaymentIntentPayload.setup_future_usage = 'off_session';
-    }
-
-    const stripeService = require('*/cartridge/scripts/stripe/services/stripeService');
-
-    const paymentIntent = stripeService.paymentIntents.create(createPaymentIntentPayload);
-
-    return paymentIntent;
+    return securePay;
 };
 
 exports.confirmPaymentIntent = function (paymentIntentId) {
-    const stripeService = require('*/cartridge/scripts/stripe/services/stripeService');
+    const yuansferService = require('*/cartridge/scripts/yuansfer/services/yuansferService');
 
-    const paymentIntent = stripeService.paymentIntents.confirm(paymentIntentId);
+    const paymentIntent = yuansferService.paymentIntents.confirm(paymentIntentId);
 
     return paymentIntent;
 };
@@ -267,47 +284,47 @@ exports.getSiteID = function () {
     return require('dw/system/Site').getCurrent().getID();
 };
 
-exports.getNewStripeOrderNumber = function () {
+exports.getNewYuansferOrderNumber = function () {
     const OrderMgr = require('dw/order/OrderMgr');
-    var stripeOrderNumber = session.privacy.stripeOrderNumber;
+    var yuansferOrderNumber = session.privacy.yuansferOrderNumber;
 
-    if (!stripeOrderNumber // Order number has not been created yet
-        || OrderMgr.getOrder(stripeOrderNumber) // The created order number has already been used, could happen in case a payment authorization attempt fails.
+    if (!yuansferOrderNumber // Order number has not been created yet
+        || OrderMgr.getOrder(yuansferOrderNumber) // The created order number has already been used, could happen in case a payment authorization attempt fails.
     ) {
         // v1
         // eslint-disable-next-line no-multi-assign
-        stripeOrderNumber = session.privacy.stripeOrderNumber = OrderMgr.createOrderNo();
+        yuansferOrderNumber = session.privacy.yuansferOrderNumber = OrderMgr.createOrderNo();
     }
 
-    return stripeOrderNumber;
+    return yuansferOrderNumber;
 };
 
 /**
- * Returns the saved order number. First checks in Stripe's payment instrument
+ * Returns the saved order number.
  * of the given line item container, then falls back to the value stored in session.
  *
  * @param {dw.order.LineItemCtnr} lineItemCtnr - Line item container to check
  * @return {string} - Saved Order number
  */
 function getSavedStripeOrderNumber(lineItemCtnr) {
-    var stripeOrderNumber = null;
+    var yuansferOrderNumber = null;
 
     if (lineItemCtnr) {
-        const stripePaymentInstrument = getStripePaymentInstrument(lineItemCtnr);
+        const yuansferPaymentInstrument = getStripePaymentInstrument(lineItemCtnr);
 
-        if (stripePaymentInstrument) {
-            const paymentTransaction = stripePaymentInstrument.paymentTransaction;
-            if ('stripeOrderNumber' in paymentTransaction.custom) {
-                stripeOrderNumber = paymentTransaction.custom.stripeOrderNumber;
+        if (yuansferPaymentInstrument) {
+            const paymentTransaction = yuansferPaymentInstrument.paymentTransaction;
+            if ('yuansferOrderNumber' in paymentTransaction.custom) {
+                yuansferOrderNumber = paymentTransaction.custom.yuansferOrderNumber;
             }
         }
     }
 
-    if (!stripeOrderNumber) {
-        stripeOrderNumber = session.privacy.stripeOrderNumber;
+    if (!yuansferOrderNumber) {
+        yuansferOrderNumber = session.privacy.yuansferOrderNumber;
     }
 
-    return stripeOrderNumber;
+    return yuansferOrderNumber;
 }
 
 exports.getNonGiftCertificateAmount = function (lineItemCtnr) {
@@ -350,14 +367,14 @@ exports.getNonGiftCertificateAmount = function (lineItemCtnr) {
 exports.createOrder = function (currentBasket) {
     const OrderMgr = require('dw/order/OrderMgr');
     const Transaction = require('dw/system/Transaction');
-    const stripeOrderNumber = getSavedStripeOrderNumber(currentBasket);
+    const yuansferOrderNumber = getSavedStripeOrderNumber(currentBasket);
 
     var order;
     try {
         order = Transaction.wrap(function () {
             var newOrder;
-            if (stripeOrderNumber) {
-                newOrder = OrderMgr.createOrder(currentBasket, stripeOrderNumber);
+            if (yuansferOrderNumber) {
+                newOrder = OrderMgr.createOrder(currentBasket, yuansferOrderNumber);
             } else {
                 newOrder = OrderMgr.createOrder(currentBasket);
             }
@@ -365,8 +382,8 @@ exports.createOrder = function (currentBasket) {
             return newOrder;
         });
 
-        session.privacy.stripeOrderNumber = null;
-        delete session.privacy.stripeOrderNumber;
+        session.privacy.yuansferOrderNumber = null;
+        delete session.privacy.yuansferOrderNumber;
     } catch (error) {
         return null;
     }
@@ -397,13 +414,13 @@ exports.refundCharge = function (order) {
     const PaymentInstrument = require('dw/order/PaymentInstrument');
     const cardPaymentInstruments = order.getPaymentInstruments(PaymentInstrument.METHOD_CREDIT_CARD);
     const cardPaymentInstrument = cardPaymentInstruments.length && cardPaymentInstruments[0];
-    const chargeId = cardPaymentInstrument && cardPaymentInstrument.custom.stripeChargeID;
+    const chargeId = cardPaymentInstrument && cardPaymentInstrument.custom.yuansferChargeID;
 
     if (chargeId) {
-        const stripeService = require('*/cartridge/scripts/stripe/services/stripeService');
+        const yuansferService = require('*/cartridge/scripts/yuansfer/services/yuansferService');
 
         try {
-            stripeService.refunds.create({
+            yuansferService.refunds.create({
                 charge: chargeId
             });
         } catch (e) {
@@ -420,10 +437,10 @@ exports.refundCharge = function (order) {
 };
 
 exports.getStripeOrderDetails = function (basket) {
-    var stripeOrderAmount = exports.getNonGiftCertificateAmount(basket);
-    var currentCurency = dw.util.Currency.getCurrency(stripeOrderAmount.getCurrencyCode());
+    var yuansferOrderAmount = exports.getNonGiftCertificateAmount(basket);
+    var currentCurency = dw.util.Currency.getCurrency(yuansferOrderAmount.getCurrencyCode());
     var multiplier = Math.pow(10, currentCurency.getDefaultFractionDigits());
-    var stripeOrderAmountCalculated = Math.round(stripeOrderAmount.getValue() * multiplier);
+    var yuansferOrderAmountCalculated = Math.round(yuansferOrderAmount.getValue() * multiplier);
 
     var billingAddress = basket.billingAddress;
     var billingAddressCountryCode = billingAddress ? billingAddress.countryCode.value : '';
@@ -457,7 +474,7 @@ exports.getStripeOrderDetails = function (basket) {
 
     var orderItems = [];
 
-    var subTotal = new dw.value.Money(0, stripeOrderAmount.getCurrencyCode());
+    var subTotal = new dw.value.Money(0, yuansferOrderAmount.getCurrencyCode());
 
     var productLineItems = basket.getAllProductLineItems().iterator();
     while (productLineItems.hasNext()) {
@@ -497,7 +514,7 @@ exports.getStripeOrderDetails = function (basket) {
     }
 
     // add tax
-    var totalTax = stripeOrderAmount.subtract(subTotal);
+    var totalTax = yuansferOrderAmount.subtract(subTotal);
     if (totalTax.value > 0) {
         var taxItem = {
             type: 'tax',
@@ -509,8 +526,8 @@ exports.getStripeOrderDetails = function (basket) {
     }
 
     return {
-        amount: stripeOrderAmountCalculated,
-        currency: stripeOrderAmount.getCurrencyCode().toLowerCase(),
+        amount: yuansferOrderAmountCalculated,
+        currency: yuansferOrderAmount.getCurrencyCode().toLowerCase(),
         purchase_country: billingAddressCountryCode,
         order_items: JSON.stringify(orderItems),
         order_shipping: JSON.stringify(orderShipping),
@@ -547,127 +564,79 @@ exports.getShippingOptions = function () {
 };
 
 /**
- * Verify Bank Account for ACH Debit Payment charge
- * @param {dw.order.Order} order object
- * @param {Integer} firstAmount first amount to charge
- * @param {Integer} secondAmount second amount to charge
- * @returns {bool} true if succeeded
- */
-exports.verifyBankAccount = function (order, firstAmount, secondAmount) {
-    var Resource = require('dw/web/Resource');
-
-    let stripeBankAccountToken = order.custom.stripeBankAccountToken;
-
-    if (empty(stripeBankAccountToken)) {
-        throw new Error(Resource.msg('achdebit.error.emptybankaccount', 'stripe', null));
-    }
-
-    let stripeCustomerID = order.custom.stripeCustomerID;
-
-    if (empty(stripeCustomerID)) {
-        throw new Error(Resource.msg('achdebit.error.emptycustomerid', 'stripe', null));
-    }
-
-    const stripeService = require('*/cartridge/scripts/stripe/services/stripeService');
-
-    var verifyBankAccountResult = stripeService.customers.verify_bank_account(stripeCustomerID, stripeBankAccountToken, firstAmount, secondAmount);
-
-    return (verifyBankAccountResult.status === 'verified');
-};
-
-/**
- * Creating an ACH charge
- * @param {dw.order.Order} order object
- * @returns {Object} service call result object
- */
-exports.createAchCharge = function (order) {
-    var Resource = require('dw/web/Resource');
-
-    let stripeCustomerID = order.custom.stripeCustomerID;
-
-    if (empty(stripeCustomerID)) {
-        throw new Error(Resource.msg('achdebit.error.emptycustomerid', 'stripe', null));
-    }
-
-    let stripeOrder = exports.getStripeOrderDetails(order);
-
-    let chargePayload = {
-        amount: stripeOrder.amount,
-        currency: stripeOrder.currency,
-        customer: order.custom.stripeCustomerID
-    };
-
-    const stripeService = require('*/cartridge/scripts/stripe/services/stripeService');
-
-    return stripeService.charges.create(chargePayload);
-};
-
-/**
- * Verify Bank Account for ACH Debit Payment charge and Creating an ACH charge
- * @param {dw.order.Order} order object
- * @param {Integer} firstAmount first amount to charge
- * @param {Integer} secondAmount second amount to charge
- * @returns {bool} true on success
- */
-exports.VerifyBankAccountAndCreateAchCharge = function (order, firstAmount, secondAmount) {
-    var Resource = require('dw/web/Resource');
-    const Order = require('dw/order/Order');
-
-    // verify Order
-    if (empty(order.custom.stripeBankAccountToken)) {
-        throw new Error(Resource.msg('achdebit.error.emptybankaccounttoken', 'stripe', null));
-    }
-
-    if (empty(order.custom.stripeCustomerID)) {
-        throw new Error(Resource.msg('achdebit.error.emptycustomerid', 'stripe', null));
-    }
-
-    if (!order.custom.stripeIsPaymentIntentInReview) {
-        throw new Error(Resource.msg('achdebit.error.alreadyprocessedorder', 'stripe', null));
-    }
-
-    const Transaction = require('dw/system/Transaction');
-
-    var bankVerifyResult = this.verifyBankAccount(order, firstAmount, secondAmount);
-
-    if (!bankVerifyResult) {
-        throw new Error(Resource.msg('achdebit.error.errorverifybankaccount', 'stripe', null));
-    }
-
-    var chargeResult = this.createAchCharge(order);
-
-    if (!chargeResult.captured) {
-        throw new Error(Resource.msg('achdebit.error.errorachdebitcapture', 'stripe', null));
-    }
-
-    Transaction.wrap(function () {
-        if (order.status === Order.ORDER_STATUS_CREATED) {
-            const OrderMgr = require('dw/order/OrderMgr');
-            OrderMgr.placeOrder(order);
-        }
-
-        order.custom.stripeIsPaymentIntentInReview = false; // eslint-disable-line no-param-reassign
-        order.setPaymentStatus(Order.PAYMENT_STATUS_PAID);
-    });
-
-    return true;
-};
-
-/**
  * Get WeChat QR Code URL by Order Number
  * @param {Integer} orderNumber to get QR Code URL
  * @returns {string} WeChat QR Code URL
  */
-exports.getWeChatQRCodeURL = function (orderNumber) {
+exports.getWeChatPayQRCodeURL = function (orderNumber) {
     const OrderMgr = require('dw/order/OrderMgr');
 
     var order = OrderMgr.getOrder(orderNumber);
 
-    return !empty(order) ? order.custom.stripeWeChatQRCodeURL : '';
+    return !empty(order) ? order.custom.yuansferWeChatPayQRCodeURL : '';
 };
 
-exports.getSiteLocale = function () {
-    var locale = request.getLocale();
+/**
+ * Get Alipay QR Code URL by Order Number
+ * @param {Integer} orderNumber to get QR Code URL
+ * @returns {string} Alipay QR Code URL
+ */
+exports.getAlipayQRCodeURL = function (orderNumber) {
+    const OrderMgr = require('dw/order/OrderMgr');
 
-    return locale ? locale.replace('_', '-') : null;
+    var order = OrderMgr.getOrder(orderNumber);
+
+    return !empty(order) ? order.custom.yuansferAlipayQRCodeURL : '';
+};
+
+/**
+ * Get Kakao Pay QR Code URL by Order Number
+ * @param {Integer} orderNumber to get QR Code URL
+ * @returns {string} KakaoPay QR Code URL
+ */
+exports.getKakaoPayCodeURL = function (orderNumber) {
+    const OrderMgr = require('dw/order/OrderMgr');
+
+    var order = OrderMgr.getOrder(orderNumber);
+
+    return !empty(order) ? order.custom.yuansferKakaoPayQRCodeURL : '';
+};
+
+/**
+ * Get Dana QR Code URL by Order Number
+ * @param {Integer} orderNumber to get QR Code URL
+ * @returns {string} Dana QR Code URL
+ */
+exports.getDanaQRCodeURL = function (orderNumber) {
+    const OrderMgr = require('dw/order/OrderMgr');
+
+    var order = OrderMgr.getOrder(orderNumber);
+
+    return !empty(order) ? order.custom.yuansferDanaQRCodeURL : '';
+};
+
+/**
+ * Get GCash QR Code URL by Order Number
+ * @param {Integer} orderNumber to get QR Code URL
+ * @returns {string} GCash QR Code URL
+ */
+exports.getGCashQRCodeURL = function (orderNumber) {
+    const OrderMgr = require('dw/order/OrderMgr');
+
+    var order = OrderMgr.getOrder(orderNumber);
+
+    return !empty(order) ? order.custom.yuansferGCashQRCodeURL : '';
+};
+
+/**
+ * Get HK Alipay QR Code URL by Order Number
+ * @param {Integer} orderNumber to get QR Code URL
+ * @returns {string} HK Alipay QR Code URL
+ */
+exports.getAlipayHKQRCodeURL = function (orderNumber) {
+    const OrderMgr = require('dw/order/OrderMgr');
+
+    var order = OrderMgr.getOrder(orderNumber);
+
+    return !empty(order) ? order.custom.yuansferAlipayHKQRCodeURL : '';
 };

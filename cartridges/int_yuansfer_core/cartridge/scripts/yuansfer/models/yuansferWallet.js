@@ -3,16 +3,16 @@
 'use strict';
 
 /**
- * Retrieves the Stripe customer ID from SFCC customer profile.
+ * Retrieves the Yuansfer customer ID from SFCC customer profile.
  *
- * @param {dw.customer.Customer} apiCustomer - Customer to retrieve the Stripe ID for.
+ * @param {dw.customer.Customer} apiCustomer - Customer to retrieve the Yuansfer ID for.
  * @return {string} - Stripe customer ID or null if not set.
  */
-function getStripeCustomerId(apiCustomer) {
+function getyuansferCustomerID(apiCustomer) {
     if (apiCustomer.authenticated
         && apiCustomer.profile
-        && 'stripeCustomerID' in apiCustomer.profile.custom) {
-        return apiCustomer.profile.custom.stripeCustomerID;
+        && 'yuansferCustomerID' in apiCustomer.profile.custom) {
+        return apiCustomer.profile.custom.yuansferCustomerID;
     }
 
     return null;
@@ -22,11 +22,11 @@ function getStripeCustomerId(apiCustomer) {
  * Saves Stripe customer ID with SFCC customer profile, thus linking the two.
  *
  * @param {dw.customer.Customer} apiCustomer - Customer to save the Stripe ID to.
- * @param {string} stripeCustomerId - The ID of the customer on Stripe end
+ * @param {string} yuansferCustomerID - The ID of the customer on Stripe end
  */
-function setStripeCustomerId(apiCustomer, stripeCustomerId) {
+function setyuansferCustomerID(apiCustomer, yuansferCustomerID) {
     if (apiCustomer.authenticated && apiCustomer.profile) {
-        apiCustomer.profile.custom.stripeCustomerID = stripeCustomerId; // eslint-disable-line
+        apiCustomer.profile.custom.yuansferCustomerID = yuansferCustomerID; // eslint-disable-line
     }
 }
 
@@ -34,24 +34,24 @@ function setStripeCustomerId(apiCustomer, stripeCustomerId) {
  * Retrieves a list of payment instruments (Stripe Payment Methods or Sources)
  * attached to a Stripe customer. Default instrument is placed first.
  *
- * @param {string} stripeCustomerId - ID of Stripe customer
+ * @param {string} yuansferCustomerID - ID of Stripe customer
  * @return {ArrayList<customerPaymentInstruments>} - Saved instruments attached
  * to a Stripe customer
  */
-function fetchSavedPaymentInstruments(stripeCustomerId) {
+function fetchSavedPaymentInstruments(yuansferCustomerID) {
     const ArrayList = require('dw/util/ArrayList');
     const savedPaymentInstruments = new ArrayList();
 
-    if (stripeCustomerId) {
+    if (yuansferCustomerID) {
         try {
             const stripeService = require('*/cartridge/scripts/stripe/services/stripeService');
 
-            const stripeCustomer = stripeService.customers.retrieve(stripeCustomerId);
+            const stripeCustomer = stripeService.customers.retrieve(yuansferCustomerID);
             const defaultPaymentMethodId = stripeCustomer.invoice_settings && stripeCustomer.invoice_settings.default_payment_method;
             const defaultSourceId = stripeCustomer.default_source;
             const defaultCardId = defaultPaymentMethodId || defaultSourceId;
 
-            const stripePaymentInstrumentsResponse = stripeService.paymentMethods.list(stripeCustomerId, 'card');
+            const stripePaymentInstrumentsResponse = stripeService.paymentMethods.list(yuansferCustomerID, 'card');
             const stripePaymentInstruments = stripePaymentInstrumentsResponse && stripePaymentInstrumentsResponse.data;
 
             if (stripePaymentInstruments && stripePaymentInstruments.length) {
@@ -83,10 +83,10 @@ function fetchSavedPaymentInstruments(stripeCustomerId) {
  * @param {dw.customer.Customer} apiCustomer - SFCC API customer object to wrap
  */
 function StripeWallet(apiCustomer) {
-    var stripeCustomerId = getStripeCustomerId(apiCustomer);
+    var yuansferCustomerID = getyuansferCustomerID(apiCustomer);
 
     this.getPaymentInstruments = function () {
-        return fetchSavedPaymentInstruments(stripeCustomerId);
+        return fetchSavedPaymentInstruments(yuansferCustomerID);
     };
 
     this.attachPaymentInstrument = function (stripePaymentMethodId) {
@@ -102,25 +102,25 @@ function StripeWallet(apiCustomer) {
 
         try {
             let newStripeCustomer;
-            if (!stripeCustomerId) {
+            if (!yuansferCustomerID) {
                 newStripeCustomer = stripeService.customers.create({
                     email: apiCustomer.profile.email,
                     name: apiCustomer.profile.firstName + ' ' + apiCustomer.profile.lastName
                 });
 
-                stripeCustomerId = newStripeCustomer.id;
+                yuansferCustomerID = newStripeCustomer.id;
             }
 
-            if (!stripeCustomerId) {
+            if (!yuansferCustomerID) {
                 throw new Error('Failed to get Stripe customer ID');
             }
 
-            stripeService.paymentMethods.attach(stripePaymentMethodId, stripeCustomerId);
+            stripeService.paymentMethods.attach(stripePaymentMethodId, yuansferCustomerID);
 
             // In case a new Stripe customer was created and all good so far
             if (newStripeCustomer) {
                 require('dw/system/Transaction').wrap(function () {
-                    setStripeCustomerId(apiCustomer, stripeCustomerId);
+                    setyuansferCustomerID(apiCustomer, yuansferCustomerID);
                 });
             }
         } catch (e) {
@@ -132,7 +132,7 @@ function StripeWallet(apiCustomer) {
     this.removePaymentInstrument = function (paymentInstrument) {
         const stripeId = paymentInstrument && paymentInstrument.custom && paymentInstrument.custom.stripeId;
 
-        if (stripeCustomerId && stripeId) {
+        if (yuansferCustomerID && stripeId) {
             const stripeService = require('*/cartridge/scripts/stripe/services/stripeService');
 
             try {
@@ -144,10 +144,10 @@ function StripeWallet(apiCustomer) {
     };
 
     this.makeDefault = function (stripeId) {
-        if (stripeCustomerId && stripeId) {
+        if (yuansferCustomerID && stripeId) {
             const stripeService = require('*/cartridge/scripts/stripe/services/stripeService');
 
-            stripeService.customers.update(stripeCustomerId, {
+            stripeService.customers.update(yuansferCustomerID, {
                 invoice_settings: {
                     default_payment_method: stripeId
                 }

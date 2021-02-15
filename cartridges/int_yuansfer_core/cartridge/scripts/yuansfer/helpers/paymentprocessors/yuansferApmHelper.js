@@ -26,7 +26,7 @@ function Handle(args) {
 
     try {
         Transaction.begin();
-        checkoutHelper.createyuansferPaymentInstrument(args.Basket, selectedPaymentMethodID, params);
+        checkoutHelper.createYuansferPaymentInstrument(args.Basket, selectedPaymentMethodID, params);
         Transaction.commit();
         return {
             success: true

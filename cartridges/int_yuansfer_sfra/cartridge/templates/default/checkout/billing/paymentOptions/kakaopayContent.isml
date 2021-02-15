@@ -5,28 +5,28 @@
     assets.addJs('/js/qrcode.js');
 </isscript>
 
-<isset name="yuansferAlipayQRCodeURL" value="${yuansferCheckoutHelper.getAlipayQRCodeURL(pdict.order.orderNumber)}" scope="page" />
+<isset name="yuansferKakaoPayQRCodeURL" value="${yuansferCheckoutHelper.getKakaoPayQRCodeURL(pdict.order.orderNumber)}" scope="page" />
 
 <div class="tab-pane ${paymentOption.ID}-content" id="${paymentOption.ID}-content" role="tabpanel">
     <fieldset class="payment-form-fields">
     
     	<input type="hidden" class="form-control" name="${pdict.forms.billingForm.paymentMethod.htmlName}"
             value="${paymentOption.ID}">
-        <input type="hidden" name="yuansfer_alipay_qrcode_url" id="yuansfer_alipay_qrcode_url">
+        <input type="hidden" name="yuansfer_kakaopay_qrcode_url" id="yuansfer_kakaopay_qrcode_url">
 
 		<div class="row">
             <div class="col-12">
-            	<p>${Resource.msg('alipay.qrcodemessage', 'yuansfer',null)}</p>
+            	<p>${Resource.msg('kakaopay.qrcodemessage', 'yuansfer',null)}</p>
             </div>
         </div>
-        <div id="alipay-qrcode-wrapper">
+        <div id="kakaopay-qrcode-wrapper">
 
-            <h1>${Resource.msg('alipay.completeyourorder', 'yuansfer', null)}</h1>
+            <h1>${Resource.msg('kakaopay.completeyourorder', 'yuansfer', null)}</h1>
 
-            <p>${Resource.msg('alipay.scanqrcode', 'yuansfer', null)} ${pdict.order.totals.grandTotal}</p>
+            <p>${Resource.msg('kakaopay.scanqrcode', 'yuansfer', null)} ${pdict.order.totals.grandTotal}</p>
             
-            <div id="alipayQRCode"></div>
-            
+            <div id="kakaopayQRCode"></div>
+
         </div>
     </fieldset>
 </div>
@@ -39,7 +39,11 @@
 	}
 	
 	ready(() => { 
-	  new QRCode(document.getElementById("alipayQRCode"), "${yuansferAlipayQRCodeURL}");
+	  var elem = document.createElement("img");
+        elem.setAttribute("height", "100");
+        elem.setAttribute("width", "100");
+        elem.src= null;
+	    document.getElementById("kakaopayQRCode").appendChild(elem);
 	});
 
 </script>
