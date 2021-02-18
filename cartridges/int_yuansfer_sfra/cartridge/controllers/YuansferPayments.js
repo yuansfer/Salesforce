@@ -4,14 +4,14 @@
 
 var server = require('server');
 
-var stripePaymentsHelper = require('*/cartridge/scripts/stripe/helpers/controllers/stripePaymentsHelper');
+var yuansferPaymentsHelper = require('*/cartridge/scripts/yuansfer/helpers/controllers/yuansferPaymentsHelper');
 var csrfProtection = require('*/cartridge/scripts/middleware/csrf');
 
 /**
  * Entry point for handling payment intent creation and confirmation AJAX calls.
  */
 server.post('BeforePaymentAuthorization', csrfProtection.validateAjaxRequest, function (req, res, next) {
-    var responsePayload = stripePaymentsHelper.BeforePaymentAuthorization();
+    var responsePayload = yuansferPaymentsHelper.BeforePaymentAuthorization();
     res.json(responsePayload);
     next();
 });
@@ -22,23 +22,23 @@ server.post('BeforePaymentAuthorization', csrfProtection.validateAjaxRequest, fu
  */
 
 server.get('HandleAPM', function (req, res, next) {
-    var redirectUrl = stripePaymentsHelper.HandleAPM(true);
+    var redirectUrl = yuansferPaymentsHelper.HandleAPM(true);
     res.redirect(redirectUrl);
     next();
 });
 
 /**
- * Get Stripe Order Items used for Klarna Widget
+ * Get Yuansfer Order Items
  */
-server.get('GetStripeOrderItems', function (req, res, next) {
+server.get('GetYuansferOrderItems', function (req, res, next) {
     var BasketMgr = require('dw/order/BasketMgr');
     var basket = BasketMgr.getCurrentBasket();
 
-    var stripeOrderDetails = basket ? require('*/cartridge/scripts/stripe/helpers/checkoutHelper').getStripeOrderDetails(basket) : null;
+    var yuansferOrderDetails = basket ? require('*/cartridge/scripts/yuansfer/helpers/checkoutHelper').getYuansferOrderDetails(basket) : null;
 
     res.json({
-        amount: stripeOrderDetails ? stripeOrderDetails.amount : [],
-        orderItems: stripeOrderDetails ? stripeOrderDetails.order_items : []
+        amount: yuansferOrderDetails ? yuansferOrderDetails.amount : [],
+        orderItems: yuansferOrderDetails ? yuansferOrderDetails.order_items : []
     });
 
     next();

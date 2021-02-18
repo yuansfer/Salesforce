@@ -42,24 +42,24 @@ function Payment(currentBasket, currentCustomer, countryCode) {
             paymentAmount.value
         );
 
-        paymentMethods = yuansferHelper.getStripePaymentMethods(paymentMethods, request.locale);
+        paymentMethods = yuansferHelper.getYuansferPaymentMethods(paymentMethods, request.locale);
 
         this.applicablePaymentMethods =
             paymentMethods ? applicablePaymentMethods(paymentMethods) : null;
     } else {
-        var applicablePaymentMethodsWithoutStripe = [];
+        var applicablePaymentMethodsWithoutYuansfer = [];
         for (var i = 0; i < this.applicablePaymentMethods.length; i++) {
             var paymentMethod = this.applicablePaymentMethods[i];
             var currentPaymentMethod = dw.order.PaymentMgr.getPaymentMethod(paymentMethod.ID);
-            if (currentPaymentMethod.paymentProcessor.ID !== 'STRIPE_APM' && currentPaymentMethod.paymentProcessor.ID !== 'STRIPE_CREDIT') {
-                applicablePaymentMethodsWithoutStripe.push({
+            if (currentPaymentMethod.paymentProcessor.ID !== 'YUANSFER_APM' && currentPaymentMethod.paymentProcessor.ID !== 'YUANSFER_CREDIT') {
+                applicablePaymentMethodsWithoutYuansfer.push({
                     ID: paymentMethod.ID,
                     name: paymentMethod.name
                 });
             }
         }
 
-        this.applicablePaymentMethods = applicablePaymentMethodsWithoutStripe;
+        this.applicablePaymentMethods = applicablePaymentMethodsWithoutYuansfer;
     }
 }
 

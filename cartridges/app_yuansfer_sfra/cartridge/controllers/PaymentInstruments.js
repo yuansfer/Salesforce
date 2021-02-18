@@ -9,9 +9,9 @@ server.extend(page);
 var userLoggedIn = require('*/cartridge/scripts/middleware/userLoggedIn');
 
 server.append('List', function (req, res, next) {
-    var stripeHelper = require('*/cartridge/scripts/stripe/helpers/stripeHelper');
-    if (stripeHelper.isStripeEnabled()) {
-        var wallet = stripeHelper.getStripeWallet(customer);
+    var yuansferHelper = require('*/cartridge/scripts/yuansfer/helpers/yuansferHelper');
+    if (yuansferHelper.isYuansferEnabled()) {
+        var wallet = yuansferHelper.getYuansferWallet(customer);
         var paymentInstruments = wallet.getPaymentInstruments();
         res.setViewData({ paymentInstruments: paymentInstruments });
     }
@@ -20,10 +20,10 @@ server.append('List', function (req, res, next) {
 
 server.prepend('DeletePayment', userLoggedIn.validateLoggedInAjax, function (req, res, next) {
     var array = require('*/cartridge/scripts/util/array');
-    var stripeHelper = require('*/cartridge/scripts/stripe/helpers/stripeHelper');
-    var wallet = stripeHelper.getStripeWallet(customer);
+    var yuansferHelper = require('*/cartridge/scripts/yuansfer/helpers/yuansferHelper');
+    var wallet = yuansferHelper.getYuansferWallet(customer);
 
-    if (!stripeHelper.isStripeEnabled()) {
+    if (!yuansferHelper.isYuansferEnabled()) {
         return next();
     }
 
@@ -45,7 +45,7 @@ server.prepend('DeletePayment', userLoggedIn.validateLoggedInAjax, function (req
         return next();
     }
 
-    wallet.removePaymentInstrument({ custom: { stripeId: UUID } });
+    wallet.removePaymentInstrument({ custom: { yuansferId: UUID } });
 
     res.json({ UUID: UUID });
     this.emit('route:Complete', req, res);

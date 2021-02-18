@@ -80,8 +80,8 @@ function shouldAlwaysSaveGuestCustomerCards() {
 }
 
 /**
- * Check if customer should be asked before save cards on Stripe side
- * @returns {boolean} true customer should be asked before save cards on Stripe side
+ * Check if customer should be asked before save cards on Yuansfer side
+ * @returns {boolean} true customer should be asked before save cards on Yuansfer side
  */
 function shouldAskBeforeSaveGuestCustomerCards() {
     return dw.system.Site.getCurrent().getCustomPreferenceValue('yuansferSaveCustomerCards').value === 'ask';
@@ -126,9 +126,6 @@ exports.createYuansferPaymentInstrument = function (lineItemCtnr, paymentMethodI
     const yuansferService = require('*/cartridge/scripts/yuansfer/services/yuansferService');
 
     if (params) {
-        if ('sourceId' in params) {
-            paymentInstrument.custom.yuansferSourceID = params.sourceId;
-        }
 
         if ('cardHolder' in params) {
             paymentInstrument.creditCardHolder = params.cardHolder;
@@ -216,7 +213,7 @@ exports.createYuansferPaymentInstrument = function (lineItemCtnr, paymentMethodI
 
         paymentInstrument.custom.yuansferSavePaymentInstrument = true;
 
-        if (newStripeGuestCustomer && newStripeGuestCustomer.id) {
+        if (newYuansferGuestCustomer && newYuansferGuestCustomer.id) {
             paymentInstrument.custom.yuansferCustomerID = newYuansferGuestCustomer.id;
         }
     }
@@ -229,16 +226,18 @@ exports.createYuansferPaymentInstrument = function (lineItemCtnr, paymentMethodI
 exports.initYuansfer = function () {
     var yuansferHelper = require('*/cartridge/scripts/yuansfer/helpers/yuansferHelper');
     const initYuansferPayload = {
-
+        merchantNo: yuansferHelper.getYuansferMerchantNo(),
+        storeNo: yuansferHelper.getYuansferStoreNo(),
+        token: yuansferHelper.getYuansferToken(),
+        isvFlag: 0,
+        env : yuansferHelper.getYuansferEnv()
     }
 
     const yuansferService = require('*/cartridge/scripts/yuansfer/services/yuansferService');
 
-    const securePay = yuansferService.securePay.create(createSecurePayPayload);
+    yuansferService.init.create(createSecurePayPayload);
 }
 exports.createSecurePay = function (paymentInstrument) {
-
-    const amount = paymentInstrument.custom.yuansferSourceID;
 
     // var currentCurency = dw.util.Currency.getCurrency(paymentInstrument.paymentTransaction.amount.currencyCode);
     // var multiplier = Math.pow(10, currentCurency.getDefaultFractionDigits());
@@ -306,11 +305,11 @@ exports.getNewYuansferOrderNumber = function () {
  * @param {dw.order.LineItemCtnr} lineItemCtnr - Line item container to check
  * @return {string} - Saved Order number
  */
-function getSavedStripeOrderNumber(lineItemCtnr) {
+function getSavedYuansferOrderNumber(lineItemCtnr) {
     var yuansferOrderNumber = null;
 
     if (lineItemCtnr) {
-        const yuansferPaymentInstrument = getStripePaymentInstrument(lineItemCtnr);
+        const yuansferPaymentInstrument = getYuansferPaymentInstrument(lineItemCtnr);
 
         if (yuansferPaymentInstrument) {
             const paymentTransaction = yuansferPaymentInstrument.paymentTransaction;
@@ -367,7 +366,7 @@ exports.getNonGiftCertificateAmount = function (lineItemCtnr) {
 exports.createOrder = function (currentBasket) {
     const OrderMgr = require('dw/order/OrderMgr');
     const Transaction = require('dw/system/Transaction');
-    const yuansferOrderNumber = getSavedStripeOrderNumber(currentBasket);
+    const yuansferOrderNumber = getSavedYuansferOrderNumber(currentBasket);
 
     var order;
     try {
@@ -402,7 +401,7 @@ exports.isAPMOrder = function (order) {
         let paymentTransaction = paymentInstrument.paymentTransaction;
         let paymentProcessor = paymentTransaction && paymentTransaction.paymentProcessor;
 
-        if (paymentProcessor && 'STRIPE_APM'.equals(paymentProcessor.ID)) {
+        if (paymentProcessor && 'YUANSFER_APM'.equals(paymentProcessor.ID)) {
             return true;
         }
     }
@@ -430,13 +429,13 @@ exports.refundCharge = function (order) {
             Logger.error(errorMessage);
             const Transaction = require('dw/system/Transaction');
             Transaction.wrap(function () {
-                order.addNote('Stripe refund failed', errorMessage);
+                order.addNote('Yuansfer refund failed', errorMessage);
             });
         }
     }
 };
 
-exports.getStripeOrderDetails = function (basket) {
+exports.getYuansferOrderDetails = function (basket) {
     var yuansferOrderAmount = exports.getNonGiftCertificateAmount(basket);
     var currentCurency = dw.util.Currency.getCurrency(yuansferOrderAmount.getCurrencyCode());
     var multiplier = Math.pow(10, currentCurency.getDefaultFractionDigits());
@@ -485,14 +484,18 @@ exports.getStripeOrderDetails = function (basket) {
             var productID = (product) ? product.getID() : '';
             var productName = (product) ? product.getName() : '';
 
+            // var productItem = {
+            //     type: 'sku',
+            //     parent: productID,
+            //     description: productName,
+            //     quantity: productLineItem.quantity.value,
+            //     currency: productLineItem.price.currencyCode,
+            //     amount: Math.round(productLineItem.getAdjustedPrice().getValue() * multiplier)
+            // };
             var productItem = {
-                type: 'sku',
-                parent: productID,
-                description: productName,
-                quantity: productLineItem.quantity.value,
-                currency: productLineItem.price.currencyCode,
-                amount: Math.round(productLineItem.getAdjustedPrice().getValue() * multiplier)
-            };
+                goods_name:productName,
+                quantity: productLineItem.quantity.value
+            }
             orderItems.push(productItem);
 
             subTotal = subTotal.add(productLineItem.getAdjustedPrice());
@@ -532,7 +535,9 @@ exports.getStripeOrderDetails = function (basket) {
         order_items: JSON.stringify(orderItems),
         order_shipping: JSON.stringify(orderShipping),
         shipping_first_name: shippingFirstName,
-        shipping_last_name: shippingLastName
+        shipping_last_name: shippingLastName,
+        note : "",
+        description: ""
     };
 };
 

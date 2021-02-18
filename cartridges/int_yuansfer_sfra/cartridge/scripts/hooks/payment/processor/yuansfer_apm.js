@@ -13,7 +13,7 @@ var PaymentStatusCodes = require('dw/order/PaymentStatusCodes');
 var Resource = require('dw/web/Resource');
 var Transaction = require('dw/system/Transaction');
 
-var YuansferAPMHelper = require('*/cartridge/scripts/stripe/helpers/paymentprocessors/yuansferApmHelper');
+var YuansferAPMHelper = require('*/cartridge/scripts/yuansfer/helpers/paymentprocessors/yuansferApmHelper');
 
 /**
  * Verifies that entered credit card information is a valid card. If the information is valid a
@@ -55,7 +55,6 @@ function Authorize(orderNumber, paymentInstrument, paymentProcessor) {
 
 exports.Handle = Handle;
 exports.Authorize = Authorize;
-exports.createToken = createToken;
 
 
 /**

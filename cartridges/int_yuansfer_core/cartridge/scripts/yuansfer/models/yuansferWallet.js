@@ -6,7 +6,7 @@
  * Retrieves the Yuansfer customer ID from SFCC customer profile.
  *
  * @param {dw.customer.Customer} apiCustomer - Customer to retrieve the Yuansfer ID for.
- * @return {string} - Stripe customer ID or null if not set.
+ * @return {string} - Yuansfer customer ID or null if not set.
  */
 function getyuansferCustomerID(apiCustomer) {
     if (apiCustomer.authenticated
@@ -19,24 +19,24 @@ function getyuansferCustomerID(apiCustomer) {
 }
 
 /**
- * Saves Stripe customer ID with SFCC customer profile, thus linking the two.
+ * Saves Yuansfer customer ID with SFCC customer profile, thus linking the two.
  *
- * @param {dw.customer.Customer} apiCustomer - Customer to save the Stripe ID to.
- * @param {string} yuansferCustomerID - The ID of the customer on Stripe end
+ * @param {dw.customer.Customer} apiCustomer - Customer to save the Yuansfer ID to.
+ * @param {string} yuansferCustomerID - The ID of the customer on Yuansfer end
  */
-function setyuansferCustomerID(apiCustomer, yuansferCustomerID) {
+function setYuansferCustomerID(apiCustomer, yuansferCustomerID) {
     if (apiCustomer.authenticated && apiCustomer.profile) {
         apiCustomer.profile.custom.yuansferCustomerID = yuansferCustomerID; // eslint-disable-line
     }
 }
 
 /**
- * Retrieves a list of payment instruments (Stripe Payment Methods or Sources)
- * attached to a Stripe customer. Default instrument is placed first.
+ * Retrieves a list of payment instruments (Yuansfer Payment Methods or Sources)
+ * attached to a Yuansfer customer. Default instrument is placed first.
  *
- * @param {string} yuansferCustomerID - ID of Stripe customer
+ * @param {string} yuansferCustomerID - ID of Yuansfer customer
  * @return {ArrayList<customerPaymentInstruments>} - Saved instruments attached
- * to a Stripe customer
+ * to a Yuansfer customer
  */
 function fetchSavedPaymentInstruments(yuansferCustomerID) {
     const ArrayList = require('dw/util/ArrayList');
@@ -44,22 +44,22 @@ function fetchSavedPaymentInstruments(yuansferCustomerID) {
 
     if (yuansferCustomerID) {
         try {
-            const stripeService = require('*/cartridge/scripts/stripe/services/stripeService');
+            const yuansferService = require('*/cartridge/scripts/yuansfer/services/yuansferService');
 
-            const stripeCustomer = stripeService.customers.retrieve(yuansferCustomerID);
-            const defaultPaymentMethodId = stripeCustomer.invoice_settings && stripeCustomer.invoice_settings.default_payment_method;
-            const defaultSourceId = stripeCustomer.default_source;
+            const yuansferCustomer = yuansferService.customers.retrieve(yuansferCustomerID);
+            const defaultPaymentMethodId = yuansferCustomer.invoice_settings && yuansferCustomer.invoice_settings.default_payment_method;
+            const defaultSourceId = yuansferCustomer.default_source;
             const defaultCardId = defaultPaymentMethodId || defaultSourceId;
 
-            const stripePaymentInstrumentsResponse = stripeService.paymentMethods.list(yuansferCustomerID, 'card');
-            const stripePaymentInstruments = stripePaymentInstrumentsResponse && stripePaymentInstrumentsResponse.data;
+            const yuansferPaymentInstrumentsResponse = yuansferService.paymentMethods.list(yuansferCustomerID, 'card');
+            const yuansferPaymentInstruments = yuansferPaymentInstrumentsResponse && yuansferPaymentInstrumentsResponse.data;
 
-            if (stripePaymentInstruments && stripePaymentInstruments.length) {
+            if (yuansferPaymentInstruments && yuansferPaymentInstruments.length) {
                 const CustomerPaymentInstrument = require('./customerPaymentInstrument');
 
-                stripePaymentInstruments.forEach(function (stripePaymentMethod) {
-                    const isDefault = stripePaymentMethod.id === defaultCardId;
-                    const savedPaymentInstrument = new CustomerPaymentInstrument(stripePaymentMethod, isDefault);
+                yuansferPaymentInstruments.forEach(function (yuansferPaymentMethod) {
+                    const isDefault = yuansferPaymentMethod.id === defaultCardId;
+                    const savedPaymentInstrument = new CustomerPaymentInstrument(yuansferPaymentMethod, isDefault);
 
                     if (savedPaymentInstrument) {
                         savedPaymentInstruments[isDefault ? 'unshift' : 'add1'](savedPaymentInstrument);
@@ -77,48 +77,48 @@ function fetchSavedPaymentInstruments(yuansferCustomerID) {
 
 /**
  * A wrapper for SFCC API customer object to provided functionality for managing
- * Stripe saved cards.
+ * Yuansfer saved cards.
  *
  * @constructor
  * @param {dw.customer.Customer} apiCustomer - SFCC API customer object to wrap
  */
-function StripeWallet(apiCustomer) {
+function YuansferWallet(apiCustomer) {
     var yuansferCustomerID = getyuansferCustomerID(apiCustomer);
 
     this.getPaymentInstruments = function () {
         return fetchSavedPaymentInstruments(yuansferCustomerID);
     };
 
-    this.attachPaymentInstrument = function (stripePaymentMethodId) {
+    this.attachPaymentInstrument = function (yuansferPaymentMethodId) {
         if (!apiCustomer.authenticated) {
             throw new Error('Authenticated customer expected');
         }
 
-        if (!stripePaymentMethodId) {
-            throw new Error('Missing Stripe payment method ID');
+        if (!yuansferPaymentMethodId) {
+            throw new Error('Missing Yuansfer payment method ID');
         }
 
-        const stripeService = require('*/cartridge/scripts/stripe/services/stripeService');
+        const yuansferService = require('*/cartridge/scripts/yuansfer/services/yuansferService');
 
         try {
-            let newStripeCustomer;
+            let newYuansferCustomer;
             if (!yuansferCustomerID) {
-                newStripeCustomer = stripeService.customers.create({
+                newYuansferCustomer = yuansferService.customers.create({
                     email: apiCustomer.profile.email,
                     name: apiCustomer.profile.firstName + ' ' + apiCustomer.profile.lastName
                 });
 
-                yuansferCustomerID = newStripeCustomer.id;
+                yuansferCustomerID = newYuansferCustomer.id;
             }
 
             if (!yuansferCustomerID) {
-                throw new Error('Failed to get Stripe customer ID');
+                throw new Error('Failed to get Yuansfer customer ID');
             }
 
-            stripeService.paymentMethods.attach(stripePaymentMethodId, yuansferCustomerID);
+            yuansferService.paymentMethods.attach(yuansferPaymentMethodId, yuansferCustomerID);
 
-            // In case a new Stripe customer was created and all good so far
-            if (newStripeCustomer) {
+            // In case a new Yuansfer customer was created and all good so far
+            if (newYuansferCustomer) {
                 require('dw/system/Transaction').wrap(function () {
                     setyuansferCustomerID(apiCustomer, yuansferCustomerID);
                 });
@@ -130,26 +130,26 @@ function StripeWallet(apiCustomer) {
     };
 
     this.removePaymentInstrument = function (paymentInstrument) {
-        const stripeId = paymentInstrument && paymentInstrument.custom && paymentInstrument.custom.stripeId;
+        const yuansferId = paymentInstrument && paymentInstrument.custom && paymentInstrument.custom.yuansferId;
 
-        if (yuansferCustomerID && stripeId) {
-            const stripeService = require('*/cartridge/scripts/stripe/services/stripeService');
+        if (yuansferCustomerID && yuansferId) {
+            const yuansferService = require('*/cartridge/scripts/yuansfer/services/yuansferService');
 
             try {
-                stripeService.paymentMethods.detach(stripeId);
+                yuansferService.paymentMethods.detach(yuansferId);
             } catch (e) {
                 require('dw/system/Logger').error(e.message);
             }
         }
     };
 
-    this.makeDefault = function (stripeId) {
-        if (yuansferCustomerID && stripeId) {
-            const stripeService = require('*/cartridge/scripts/stripe/services/stripeService');
+    this.makeDefault = function (yuansferId) {
+        if (yuansferCustomerID && yuansferId) {
+            const yuansferService = require('*/cartridge/scripts/yuansfer/services/yuansferService');
 
-            stripeService.customers.update(yuansferCustomerID, {
+            yuansferService.customers.update(yuansferCustomerID, {
                 invoice_settings: {
-                    default_payment_method: stripeId
+                    default_payment_method: yuansferId
                 }
             });
         }
@@ -157,5 +157,5 @@ function StripeWallet(apiCustomer) {
 }
 
 module.exports = function (apiCustomer) {
-    return new StripeWallet(apiCustomer);
+    return new YuansferWallet(apiCustomer);
 };

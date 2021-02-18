@@ -5,6 +5,7 @@
 /* API Includes */
 const LocalServiceRegistry = require('dw/svc/LocalServiceRegistry');
 const yuansferWallet = require('../models/yuansferWallet');
+const yuansferHelper = require('*/cartridge/scripts/yuansfer/helpers/yuansferHelper');
 
 /**
  * Replaces credit card number (a number following card_number=) in a given

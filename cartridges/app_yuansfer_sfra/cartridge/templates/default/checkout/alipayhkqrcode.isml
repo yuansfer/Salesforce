@@ -7,28 +7,14 @@
 
 <isset name="yuansferAlipayHKQRCodeURL" value="${yuansferCheckoutHelper.getAlipayHKQRCodeURL(pdict.order.orderNumber)}" scope="page" />
 
-<div class="tab-pane ${paymentOption.ID}-content" id="${paymentOption.ID}-content" role="tabpanel">
-    <fieldset class="payment-form-fields">
+<div id="alipayhk-qrcode-wrapper">
+
+    <h1>${Resource.msg('alipayhk.completeyourorder', 'yuansfer', null)}</h1>
+
+    <p>${Resource.msg('alipayhk.scanqrcode', 'yuansfer', null)} ${pdict.order.totals.grandTotal}</p>
     
-    	<input type="hidden" class="form-control" name="${pdict.forms.billingForm.paymentMethod.htmlName}"
-            value="${paymentOption.ID}">
-        <input type="hidden" name="yuansfer_alipayhk_qrcode_url" id="yuansfer_alipayhk_qrcode_url">
-
-		<div class="row">
-            <div class="col-12">
-            	<p>${Resource.msg('alipayhk.qrcodemessage', 'yuansfer',null)}</p>
-            </div>
-        </div>
-        <div id="alipayhk-qrcode-wrapper">
-
-            <h1>${Resource.msg('alipayhk.completeyourorder', 'yuansfer', null)}</h1>
-
-            <p>${Resource.msg('alipayhk.scanqrcode', 'yuansfer', null)} ${pdict.order.totals.grandTotal}</p>
-            
-            <div id="alipayhkQRCode"></div>
-            
-        </div>
-    </fieldset>
+    <div id="alipayhkQRCode"></div>
+    
 </div>
 
 <script type="text/javascript">

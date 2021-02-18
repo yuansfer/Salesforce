@@ -1,8 +1,13 @@
 <isset name="yuansferCheckoutHelper" value="${require('*/cartridge/scripts/yuansfer/helpers/checkoutHelper')}" scope="page" />
 <isset name="yuansferHelper" value="${require('*/cartridge/scripts/yuansfer/helpers/yuansferHelper')}" scope="page" />
 <isset name="yuansferEnabled" value="${yuansferHelper.isYuansferEnabled()}" scope="page" />
+<isset name="yuansferService" value="${require('*/cartridge/scripts/yuansfer/services/yuansferService')}" scope="page" />
 
 <isif condition="${yuansferEnabled}">
+    <isscript>
+        var assets = require('*/cartridge/scripts/assets.js');
+        assets.addJs('/js/yuansfer.js');
+    </isscript>
     <isscript>
         var assets = require('*/cartridge/scripts/assets.js');
         assets.addJs('/js/yuansfer.checkout.js');
@@ -13,7 +18,7 @@
 <input type="hidden" id="getYuansferOrderItemsURL" value="${URLUtils.https('YuansferPayments-GetYuansferOrderItems')}" />
 <input type="hidden" id="billingPageUrl" value="${URLUtils.url('Checkout-Begin', 'stage', 'payment')}" />
 
-<input type="hidden" name="yuansfer_source_client_secret" id="yuansfer_source_client_secret">
+
 <input type="hidden" name="yuansfer_redirect_url" id="yuansfer_redirect_url">
 
 <isset name="yuansferOrder" value="${require('*/cartridge/scripts/yuansfer/helpers/checkoutHelper').getYuansferOrderDetails(dw.order.BasketMgr.getCurrentBasket())}" scope="page" />
@@ -42,7 +47,7 @@
                     >
                     <input type="hidden" name="cardNumber" value="" class="cardNumber" id="cardNumber">
                     <input type="hidden" name="yuansfer_source_id" id="yuansfer_source_id">
-                    <isinclude template="yuansfer/checkout/billing/sfra_cardform" />
+                    <iscomment> <isinclude template="yuansfer/checkout/billing/sfra_cardform" /> </iscomment>
                 </fieldset>
             </div>
         <iselse/>

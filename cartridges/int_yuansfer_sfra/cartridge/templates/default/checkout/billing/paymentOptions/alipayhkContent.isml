@@ -3,11 +3,11 @@
     
     	<input type="hidden" class="form-control" name="${pdict.forms.billingForm.paymentMethod.htmlName}"
             value="${paymentOption.ID}">
-        <input type="hidden" name="yuansfer_gcash_qrcode_url" id="yuansfer_gcash_qrcode_url">
+        <input type="hidden" name="yuansfer_alipayhk_qrcode_url" id="yuansfer_alipayhk_qrcode_url">
 
 		<div class="row">
             <div class="col-12">
-            	<p>${Resource.msg('gcash.qrcodemessage', 'yuansfer',null)}</p>
+            	<p>${Resource.msg('alipayhk.qrcodemessage', 'yuansfer',null)}</p>
             </div>
         </div>
     </fieldset>

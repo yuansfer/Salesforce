@@ -27,7 +27,7 @@ function isYuansferAPMPayment(paymentMethod) {
  */
 exports.isYuansferEnabled = function () {
     var Site = require('dw/system/Site');
-    return Site.getCurrent().getCustomPreferenceValue('yuansferEnabled');
+    return Site.current.preferences.custom.yuansferEnable;
 };
 
 
@@ -37,7 +37,7 @@ exports.isYuansferEnabled = function () {
 * @returns {string} Yuansfer MerchantNo.
 */
 exports.getYuansferMerchantNo = function () {
-    return require('dw/system/Site').current.getCustomPreferenceValue('yuansferMerchantNo');
+    return require('dw/system/Site').current.preferences.custom.yuansferMerchantNo;
 };
 
 /**
@@ -46,7 +46,7 @@ exports.getYuansferMerchantNo = function () {
 * @returns {string} Yuansfer Token.
 */
 exports.getYuansferToken = function () {
-    return require('dw/system/Site').current.getCustomPreferenceValue('yuansferToken');
+    return require('dw/system/Site').current.preferences.custom.yuansferToken;
 };
 
 /**
@@ -55,7 +55,7 @@ exports.getYuansferToken = function () {
 * @returns {string} Yuansfer StoreNo.
 */
 exports.getYuansferStoreNo = function () {
-    return require('dw/system/Site').current.getCustomPreferenceValue('yuansferStoreNo');
+    return require('dw/system/Site').current.preferences.custom.yuansferStoreNo;
 };
 
 /**
@@ -64,7 +64,7 @@ exports.getYuansferStoreNo = function () {
 * @returns {string} Yuansfer Env.
 */
 exports.getYuansferEnv = function () {
-    return require('dw/system/Site').current.getCustomPreferenceValue('yuansferEnv');
+    return require('dw/system/Site').current.preferences.custom.yuansferEnv;
 };
 
 /**
@@ -73,7 +73,7 @@ exports.getYuansferEnv = function () {
 * @returns {string} Yuansfer.js URL
 */
 exports.getYuansferScriptUrl = function () {
-    return require('dw/system/Site').current.getCustomPreferenceValue('yuansferScriptUrl');
+    return require('dw/system/Site').current.preferences.custom.yuansferScriptUrl;
 };
 
 /**

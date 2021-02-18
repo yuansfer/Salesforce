@@ -1,11 +1,3 @@
-<isset name="yuansferCheckoutHelper" value="${require('*/cartridge/scripts/yuansfer/helpers/checkoutHelper')}" scope="page" />
-
-<isscript>
-    var assets = require('*/cartridge/scripts/assets.js');
-    assets.addJs('/js/qrcode.js');
-</isscript>
-
-<isset name="yuansferKakaoPayQRCodeURL" value="${yuansferCheckoutHelper.getKakaoPayQRCodeURL(pdict.order.orderNumber)}" scope="page" />
 
 <div class="tab-pane ${paymentOption.ID}-content" id="${paymentOption.ID}-content" role="tabpanel">
     <fieldset class="payment-form-fields">
@@ -19,31 +11,5 @@
             	<p>${Resource.msg('kakaopay.qrcodemessage', 'yuansfer',null)}</p>
             </div>
         </div>
-        <div id="kakaopay-qrcode-wrapper">
-
-            <h1>${Resource.msg('kakaopay.completeyourorder', 'yuansfer', null)}</h1>
-
-            <p>${Resource.msg('kakaopay.scanqrcode', 'yuansfer', null)} ${pdict.order.totals.grandTotal}</p>
-            
-            <div id="kakaopayQRCode"></div>
-
-        </div>
     </fieldset>
 </div>
-
-<script type="text/javascript">
-
-	var ready = (callback) => {
-	  if (document.readyState != "loading") callback();
-	  else document.addEventListener("DOMContentLoaded", callback);
-	}
-	
-	ready(() => { 
-	  var elem = document.createElement("img");
-        elem.setAttribute("height", "100");
-        elem.setAttribute("width", "100");
-        elem.src= null;
-	    document.getElementById("kakaopayQRCode").appendChild(elem);
-	});
-
-</script>

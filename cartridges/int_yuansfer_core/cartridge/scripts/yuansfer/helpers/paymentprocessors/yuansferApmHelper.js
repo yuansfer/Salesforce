@@ -21,7 +21,11 @@ function Handle(args) {
         bankAccountTokenId: paramsMap.yuansfer_bank_account_token_id.stringValue,
         bankAccountToken: paramsMap.yuansfer_bank_account_token.stringValue,
         yuansferWeChatQRCodeURL: paramsMap.yuansfer_wechat_qrcode_url.stringValue,
-        yuansferAlipayQRCodeURL: paramsMap.yuansfer_alipay_qrcode_url.stringValue
+        yuansferAlipayQRCodeURL: paramsMap.yuansfer_alipay_qrcode_url.stringValue,
+        yuansferDanaQRCodeURL: paramsMap.yuansfer_dana_qrcode_url.stringValue,
+        yuansferAlipayHKQRCodeURL: paramsMap.yuansfer_alipayhk_qrcode_url.stringValue,
+        yuansferGCashQRCodeURL: paramsMap.yuansfer_gcash_qrcode_url.stringValue,
+        yuansferKakaoPayQRCodeURL: paramsMap.yuansfer_KakaoPay_qrcode_url.stringValue,
     };
 
     try {

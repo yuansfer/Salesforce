@@ -4,7 +4,6 @@
 
 var COHelpers = module.superModule;
 var yuansferHelper = require('*/cartridge/scripts/yuansfer/helpers/yuansferHelper');
-
 if (yuansferHelper.isYuansferEnabled()) {
     /**
      * Validates payment - Overriden because yuansfer validates the cards.

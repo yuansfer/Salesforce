@@ -11,16 +11,16 @@
  * @return {Object} - Response payload to return to client
  */
 function generateCardsPaymentResponse(intent) {
-    const stripeChargeCapture = dw.system.Site.getCurrent().getCustomPreferenceValue('stripeChargeCapture');
+    const yuansferChargeCapture = dw.system.Site.getCurrent().getCustomPreferenceValue('yuansferChargeCapture');
     var responsePayload;
-    if (intent.status === 'requires_capture' && !stripeChargeCapture) {
+    if (intent.status === 'requires_capture' && !yuansferChargeCapture) {
         // The payment requires capture which will be made later
         responsePayload = {
             success: true
         };
     } else if (
         intent.status === 'requires_action' &&
-        intent.next_action.type === 'use_stripe_sdk'
+        intent.next_action.type === 'use_yuansfer_sdk'
     ) {
         // Tell the client to handle the action
         responsePayload = {
@@ -55,61 +55,35 @@ function beforePaymentAuthorization() {
     try {
         var basket = BasketMgr.getCurrentBasket();
         if (basket) {
-            var checkoutHelper = require('*/cartridge/scripts/stripe/helpers/checkoutHelper');
+            var checkoutHelper = require('*/cartridge/scripts/yuansfer/helpers/checkoutHelper');
 
-            var stripePaymentInstrument = checkoutHelper.getStripePaymentInstrument(basket);
+            var yuansferPaymentInstrument = checkoutHelper.getYuansferPaymentInstrument(basket);
 
-            if (stripePaymentInstrument && stripePaymentInstrument.paymentMethod === 'CREDIT_CARD') {
+            if (yuansferPaymentInstrument && yuansferPaymentInstrument.paymentMethod === 'CREDIT_CARD') {
                 var paymentIntent;
-                var paymentIntentId = (stripePaymentInstrument.paymentTransaction) ?
-                    stripePaymentInstrument.paymentTransaction.getTransactionID() : null;
+                var paymentIntentId = (yuansferPaymentInstrument.paymentTransaction) ?
+                    yuansferPaymentInstrument.paymentTransaction.getTransactionID() : null;
                 if (paymentIntentId) {
                     paymentIntent = checkoutHelper.confirmPaymentIntent(paymentIntentId);
                 } else {
-                    paymentIntent = checkoutHelper.createPaymentIntent(stripePaymentInstrument);
+                    paymentIntent = checkoutHelper.createPaymentIntent(yuansferPaymentInstrument);
 
                     Transaction.wrap(function () {
-                        stripePaymentInstrument.paymentTransaction.setTransactionID(paymentIntent.id);
+                        yuansferPaymentInstrument.paymentTransaction.setTransactionID(paymentIntent.id);
                     });
                 }
 
                 if (paymentIntent.review) {
                     Transaction.wrap(function () {
-                        basket.custom.stripeIsPaymentIntentInReview = true;
+                        basket.custom.yuansferIsPaymentIntentInReview = true;
                     });
                 }
 
                 responsePayload = generateCardsPaymentResponse(paymentIntent);
-            } else if (stripePaymentInstrument && stripePaymentInstrument.paymentMethod === 'STRIPE_ACH_DEBIT') {
-                const stripeService = require('*/cartridge/scripts/stripe/services/stripeService');
-
-                const newStripeCustomer = stripeService.customers.create({
-                    source: stripePaymentInstrument.custom.stripeBankAccountTokenId
-                });
-
-                let yuansferCustomerID = newStripeCustomer.id;
-
+            } else if (yuansferPaymentInstrument && yuansferPaymentInstrument.paymentMethod === 'STRIPE_WECHATPAY') {
                 Transaction.wrap(function () {
-                    basket.custom.yuansferCustomerID = yuansferCustomerID;
-                    basket.custom.stripeBankAccountToken = stripePaymentInstrument.custom.stripeBankAccountToken;
-                    basket.custom.stripeIsPaymentIntentInReview = true;
-                });
-
-                responsePayload = {
-                    success: true
-                };
-            } else if (stripePaymentInstrument && stripePaymentInstrument.paymentMethod === 'STRIPE_WECHATPAY') {
-                Transaction.wrap(function () {
-                    basket.custom.stripeWeChatQRCodeURL = stripePaymentInstrument.custom.stripeWeChatQRCodeURL;
-                    basket.custom.stripeIsPaymentIntentInReview = true;
-                });
-
-                responsePayload = {
-                    success: true
-                };
-            } else if (stripePaymentInstrument && stripePaymentInstrument.paymentMethod === 'STRIPE_KLARNA') {
-                Transaction.wrap(function () {
-                    basket.custom.stripeIsPaymentIntentInReview = true;
+                    basket.custom.yuansferWeChatQRCodeURL = yuansferPaymentInstrument.custom.yuansferWeChatQRCodeURL;
+                    basket.custom.yuansferIsPaymentIntentInReview = true;
                 });
 
                 responsePayload = {
@@ -154,26 +128,9 @@ function handleAPM(sfra) {
     const URLUtils = require('dw/web/URLUtils');
     const paramsMap = request.httpParameterMap;
 
-    const sourceId = paramsMap.source.stringValue;
-    const sourceClientSecret = paramsMap.client_secret.stringValue;
-
     var redirectUrl = '';
     try {
-        const stripeService = require('*/cartridge/scripts/stripe/services/stripeService');
-
-        // handle payments with source id
-        // Please Note: for ACH Debit payments, the source id is empty
-        if (!empty(sourceId)) {
-            const source = stripeService.sources.retrieve(sourceId);
-
-            if (source.client_secret !== sourceClientSecret) {
-                throw new Error('Source client secret mismatch');
-            }
-
-            if (['chargeable', 'pending'].indexOf(source.status) < 0) {
-                throw new Error('Source not authorized.');
-            }
-        }
+        const yuansferService = require('*/cartridge/scripts/yuansfer/services/yuansferService');
 
         if (sfra) {
             redirectUrl = URLUtils.url('Checkout-Begin', 'stage', 'placeOrder');

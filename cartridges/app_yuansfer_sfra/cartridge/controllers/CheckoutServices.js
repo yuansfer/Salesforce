@@ -8,8 +8,8 @@ var page = module.superModule;
 server.extend(page);
 
 server.prepend('PlaceOrder', server.middleware.https, function (req, res, next) {
-    var stripeHelper = require('*/cartridge/scripts/stripe/helpers/stripeHelper');
-    if (stripeHelper.isStripeEnabled()) {
+    var yuansferHelper = require('*/cartridge/scripts/yuansfer/helpers/yuansferHelper');
+    if (!yuansferHelper.isYuansferEnabled()) {
         return next();
     }
 
@@ -24,7 +24,7 @@ server.prepend('PlaceOrder', server.middleware.https, function (req, res, next) 
     var validationHelpers = require('*/cartridge/scripts/helpers/basketValidationHelpers');
     var collections = require('*/cartridge/scripts/util/collections');
     var PaymentMgr = require('dw/order/PaymentMgr');
-    var isStripe = false;
+    var isYuansfer = false;
     var currentBasket = BasketMgr.getCurrentBasket();
 
     if (!currentBasket) {
@@ -41,12 +41,12 @@ server.prepend('PlaceOrder', server.middleware.https, function (req, res, next) 
     collections.forEach(currentBasket.getPaymentInstruments(), function (paymentInstrument) {
         var paymentProcessor = PaymentMgr.getPaymentMethod(paymentInstrument.getPaymentMethod()).getPaymentProcessor();
 
-        if (paymentProcessor.ID === 'STRIPE_APM' || paymentProcessor.ID === 'STRIPE_CREDIT') {
-            isStripe = true;
+        if (paymentProcessor.ID === 'YUANSFER_APM' || paymentProcessor.ID === 'YUANSFER_CREDIT') {
+            isYuansfer = true;
         }
     });
 
-    if (!isStripe) {
+    if (!isYuansfer) {
         return next();
     }
 
@@ -144,10 +144,10 @@ server.prepend('PlaceOrder', server.middleware.https, function (req, res, next) 
         return null;
     }
 
-    // Stripe changes BEGIN
-    const stripeCheckoutHelper = require('*/cartridge/scripts/stripe/helpers/checkoutHelper');
-    var order = stripeCheckoutHelper.createOrder(currentBasket);
-    // Stripe changes END
+    // Yuansfer changes BEGIN
+    const yuansferCheckoutHelper = require('*/cartridge/scripts/yuansfer/helpers/checkoutHelper');
+    var order = yuansferCheckoutHelper.createOrder(currentBasket);
+    // Yuansfer changes END
 
     if (!order) {
         res.json({
@@ -187,12 +187,12 @@ server.prepend('PlaceOrder', server.middleware.https, function (req, res, next) 
         return null;
     }
 
-    // Stripe changes BEGIN
-    var isAPMOrder = stripeCheckoutHelper.isAPMOrder(order);
+    // Yuansfer changes BEGIN
+    var isAPMOrder = yuansferCheckoutHelper.isAPMOrder(order);
     if (!isAPMOrder) {
-        var stripePaymentInstrument = stripeCheckoutHelper.getStripePaymentInstrument(order);
+        var yuansferPaymentInstrument = yuansferCheckoutHelper.getYuansferPaymentInstrument(order);
 
-        if (stripePaymentInstrument && order.custom.stripeIsPaymentIntentInReview) {
+        if (yuansferPaymentInstrument && order.custom.yuansferIsPaymentIntentInReview) {
             res.json({
                 error: false,
                 orderID: order.orderNo,
@@ -206,7 +206,7 @@ server.prepend('PlaceOrder', server.middleware.https, function (req, res, next) 
         // Places the order
         var placeOrderResult = COHelpers.placeOrder(order, fraudDetectionStatus);
         if (placeOrderResult.error) {
-            stripeCheckoutHelper.refundCharge(order);
+            yuansferCheckoutHelper.refundCharge(order);
             res.json({
                 error: true,
                 errorMessage: Resource.msg('error.technical', 'checkout', null)
@@ -239,7 +239,7 @@ server.prepend('PlaceOrder', server.middleware.https, function (req, res, next) 
 
     this.emit('route:Complete', req, res);
     return null;
-    // Stripe changes END
+    // Yuansfer changes END
 });
 
 module.exports = server.exports();

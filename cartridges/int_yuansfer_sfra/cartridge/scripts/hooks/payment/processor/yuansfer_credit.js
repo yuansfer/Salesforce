@@ -14,7 +14,7 @@ var PaymentStatusCodes = require('dw/order/PaymentStatusCodes');
 var Resource = require('dw/web/Resource');
 var Transaction = require('dw/system/Transaction');
 
-var StripeCreditHelper = require('*/cartridge/scripts/stripe/helpers/paymentprocessors/stripeCreditHelper');
+var YuansferCreditHelper = require('*/cartridge/scripts/yuansfer/helpers/paymentprocessors/yuansferCreditHelper');
 
 /**
  * Creates a token. This should be replaced by utilizing a tokenization provider
@@ -34,7 +34,7 @@ function createToken() {
 function Handle(basket, paymentInformation) {
     var serverErrors = [];
 
-    var result = StripeCreditHelper.Handle({ Basket: basket });
+    var result = YuansferCreditHelper.Handle({ Basket: basket });
     if (result.errorMessage) {
         serverErrors.push(result.errorMessage);
     }
@@ -54,7 +54,7 @@ function Authorize(orderNumber, paymentInstrument, paymentProcessor) {
     var serverErrors = [];
     var order = dw.order.OrderMgr.getOrder(orderNumber);
 
-    var result = StripeCreditHelper.Authorize({
+    var result = YuansferCreditHelper.Authorize({
         Order: order, OrderNo: orderNumber, PaymentInstrument: paymentInstrument, PaymentProcessor: paymentProcessor
     });
 
@@ -80,7 +80,7 @@ exports.createToken = createToken;
  */
 function processForm(req, paymentForm, viewFormData) {
     var viewData = viewFormData;
-    const cardType = require('*/cartridge/scripts/stripe/helpers/cardsHelper').getCardType();
+    const cardType = require('*/cartridge/scripts/yuansfer/helpers/cardsHelper').getCardType();
 
     viewData.paymentMethod = {
         value: paymentForm.paymentMethod.value,
