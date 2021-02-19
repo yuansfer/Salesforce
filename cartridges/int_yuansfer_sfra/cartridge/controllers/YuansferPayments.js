@@ -11,11 +11,10 @@ var csrfProtection = require('*/cartridge/scripts/middleware/csrf');
  * Entry point for handling payment intent creation and confirmation AJAX calls.
  */
 server.post('BeforePaymentAuthorization', csrfProtection.validateAjaxRequest, function (req, res, next) {
-    var responsePayload = yuansferPaymentsHelper.BeforePaymentAuthorization();
+    var responsePayload = yuansferPaymentsHelper.BeforePaymentAuthorization(req);
     res.json(responsePayload);
     next();
 });
-
 
 /**
  * An entry point to handle returns from alternative payment methods.

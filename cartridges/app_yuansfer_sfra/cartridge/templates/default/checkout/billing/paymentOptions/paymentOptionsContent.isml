@@ -13,7 +13,8 @@
         assets.addJs('/js/yuansfer.checkout.js');
     </isscript>
 </isif>
-<input type="hidden" id="yuansferAccountCountry" value="${yuansferCheckoutHelper.getPRCountry()}" />
+
+<input type="hidden" id="HandleYuansferRequestUrl" value="${URLUtils.https('YuansferPayments-HandleYuansferRequestUrl')}" />
 <input type="hidden" id="beforePaymentAuthURL" value="${URLUtils.https('YuansferPayments-BeforePaymentAuthorization')}" />
 <input type="hidden" id="getYuansferOrderItemsURL" value="${URLUtils.https('YuansferPayments-GetYuansferOrderItems')}" />
 <input type="hidden" id="billingPageUrl" value="${URLUtils.url('Checkout-Begin', 'stage', 'payment')}" />
@@ -31,13 +32,12 @@
 
 <input type="hidden" id="yuansfer_order_items" value="${yuansferOrder.order_items}">
 
-<input type="hidden" id="yuansfer_site_locale" value="${require('*/cartridge/scripts/yuansfer/helpers/checkoutHelper').getSiteLocale()}">
-
 
 <isloop items="${pdict.order.billing.payment.applicablePaymentMethods}" var="paymentOption">
 
     <isif condition="${paymentOption.ID === 'CREDIT_CARD'}">
-        <isif condition="${yuansferEnabled}">
+       <isif condition="${yuansferEnabled}">
+            
             <div class="tab-pane active ${paymentOption.ID}-content" id="${paymentOption.ID}-content" role="tabpanel">
                 <fieldset class="payment-form-fields">
 
@@ -47,12 +47,12 @@
                     >
                     <input type="hidden" name="cardNumber" value="" class="cardNumber" id="cardNumber">
                     <input type="hidden" name="yuansfer_source_id" id="yuansfer_source_id">
-                    <iscomment> <isinclude template="yuansfer/checkout/billing/sfra_cardform" /> </iscomment>
+                    <iscomment> <isinclude template="default/yuansfer/checkout/billing/sfra_cardform" /> </iscomment>
                 </fieldset>
             </div>
         <iselse/>
             <isinclude template="checkout/billing/paymentOptions/creditCardContent" />
-        </isif>
+        </isif> 
     
     <iselseif condition="${paymentOption.ID === 'YUANSFER_ALIPAY'}"/>
         <isinclude template="checkout/billing/paymentOptions/alipayContent" />

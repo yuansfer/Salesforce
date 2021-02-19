@@ -510,6 +510,7 @@ function initYuansfer() {
     var token = document.getElementById('yuansfer_token');
     var env = document.getElementById('yuansfer_env');
     var isvFlag = 0;
+    var temp =hi;
 
     yuansfear.init({
         merchantNo: merchantNo,

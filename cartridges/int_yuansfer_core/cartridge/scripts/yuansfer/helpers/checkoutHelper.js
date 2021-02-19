@@ -223,45 +223,20 @@ exports.createYuansferPaymentInstrument = function (lineItemCtnr, paymentMethodI
     }
 };
 
-exports.initYuansfer = function () {
-    var yuansferHelper = require('*/cartridge/scripts/yuansfer/helpers/yuansferHelper');
-    const initYuansferPayload = {
-        merchantNo: yuansferHelper.getYuansferMerchantNo(),
-        storeNo: yuansferHelper.getYuansferStoreNo(),
-        token: yuansferHelper.getYuansferToken(),
-        isvFlag: 0,
-        env : yuansferHelper.getYuansferEnv()
-    }
+exports.createSecurePay = function (params) {
 
-    const yuansferService = require('*/cartridge/scripts/yuansfer/services/yuansferService');
-
-    yuansferService.init.create(createSecurePayPayload);
-}
-exports.createSecurePay = function (paymentInstrument) {
-
-    // var currentCurency = dw.util.Currency.getCurrency(paymentInstrument.paymentTransaction.amount.currencyCode);
-    // var multiplier = Math.pow(10, currentCurency.getDefaultFractionDigits());
-    var amount = paymentInstrument.paymentTransaction.amount.value;
-
-    const currency = paymentInstrument.paymentTransaction.amount.currencyCode;
-    const reference =  yuansferHelper.getYuansferToken()+exports.getNewYuansferOrderNumber();
+    const reference =  yuansferHelper.getYuansferToken()+params.reference;
     const createSecurePayPayload = {
-        vendor: paymentMethod,
-        amount: amount,
-        currency: currency,
-        settleCurrency: currency,
+        vendor: params.vendor,
+        amount: params.amount,
+        currency: params.currency,
         reference: reference,
         ipnUrl: "http://zk-tys.yunkeguan.com/ttest/test",
         callback:"http://zk-tys.yunkeguan.com/ttest/test2?status={status}",
         description:"test",
         note:"testnote",
-        terminal:"ONLINE",
-        goodsInfo:[
-            {
-                "goods_name": "name1",
-                "quantity": "quantity1"
-            }
-        ]
+        terminal:params.terminal,
+        goodsInfo:params.goodsInfo
     };
 
     const yuansferService = require('*/cartridge/scripts/yuansfer/services/yuansferService');
@@ -438,8 +413,7 @@ exports.refundCharge = function (order) {
 exports.getYuansferOrderDetails = function (basket) {
     var yuansferOrderAmount = exports.getNonGiftCertificateAmount(basket);
     var currentCurency = dw.util.Currency.getCurrency(yuansferOrderAmount.getCurrencyCode());
-    var multiplier = Math.pow(10, currentCurency.getDefaultFractionDigits());
-    var yuansferOrderAmountCalculated = Math.round(yuansferOrderAmount.getValue() * multiplier);
+    var yuansferOrderAmountCalculated =yuansferOrderAmount.getValue();
 
     var billingAddress = basket.billingAddress;
     var billingAddressCountryCode = billingAddress ? billingAddress.countryCode.value : '';
@@ -503,34 +477,34 @@ exports.getYuansferOrderDetails = function (basket) {
     }
 
     // add shipping
-    var shippingTotalPrice = basket.getAdjustedShippingTotalPrice();
-    if (shippingTotalPrice.available) {
-        var shippingItem = {
-            type: 'shipping',
-            description: 'Shipping',
-            currency: shippingTotalPrice.currencyCode,
-            amount: Math.round(shippingTotalPrice.getValue() * multiplier)
-        };
-        orderItems.push(shippingItem);
+    // var shippingTotalPrice = basket.getAdjustedShippingTotalPrice();
+    // if (shippingTotalPrice.available) {
+    //     var shippingItem = {
+    //         type: 'shipping',
+    //         description: 'Shipping',
+    //         currency: shippingTotalPrice.currencyCode,
+    //         amount: shippingTotalPrice.getValue()
+    //     };
+    //     orderItems.push(shippingItem);
 
-        subTotal = subTotal.add(shippingTotalPrice);
-    }
+    //     subTotal = subTotal.add(shippingTotalPrice);
+    // }
 
     // add tax
-    var totalTax = yuansferOrderAmount.subtract(subTotal);
-    if (totalTax.value > 0) {
-        var taxItem = {
-            type: 'tax',
-            description: 'Taxes',
-            currency: basket.totalTax.currencyCode,
-            amount: Math.round(totalTax.getValue() * multiplier)
-        };
-        orderItems.push(taxItem);
-    }
+    // var totalTax = yuansferOrderAmount.subtract(subTotal);
+    // if (totalTax.value > 0) {
+    //     var taxItem = {
+    //         type: 'tax',
+    //         description: 'Taxes',
+    //         currency: basket.totalTax.currencyCode,
+    //         amount:totalTax.getValue()
+    //     };
+    //     orderItems.push(taxItem);
+    // }
 
     return {
         amount: yuansferOrderAmountCalculated,
-        currency: yuansferOrderAmount.getCurrencyCode().toLowerCase(),
+        currency: yuansferOrderAmount.getCurrencyCode(),
         purchase_country: billingAddressCountryCode,
         order_items: JSON.stringify(orderItems),
         order_shipping: JSON.stringify(orderShipping),

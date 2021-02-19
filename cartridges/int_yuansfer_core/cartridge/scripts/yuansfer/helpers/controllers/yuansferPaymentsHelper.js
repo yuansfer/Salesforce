@@ -44,19 +44,17 @@ function generateCardsPaymentResponse(intent) {
 }
 
 /**
- * Entry point for handling payment intent creation and confirmation AJAX calls.
+ * Entry point for handling payment creation and confirmation AJAX calls.
  * @return {Object} responsePayload.
  */
-function beforePaymentAuthorization() {
+function beforePaymentAuthorization(params) {
     var BasketMgr = require('dw/order/BasketMgr');
     var Transaction = require('dw/system/Transaction');
     var responsePayload;
-
+    var checkoutHelper = require('*/cartridge/scripts/yuansfer/helpers/checkoutHelper');
     try {
         var basket = BasketMgr.getCurrentBasket();
         if (basket) {
-            var checkoutHelper = require('*/cartridge/scripts/yuansfer/helpers/checkoutHelper');
-
             var yuansferPaymentInstrument = checkoutHelper.getYuansferPaymentInstrument(basket);
 
             if (yuansferPaymentInstrument && yuansferPaymentInstrument.paymentMethod === 'CREDIT_CARD') {
@@ -75,25 +73,45 @@ function beforePaymentAuthorization() {
 
                 if (paymentIntent.review) {
                     Transaction.wrap(function () {
-                        basket.custom.yuansferIsPaymentIntentInReview = true;
+                        basket.custom.yuansferIsPaymentInReview = true;
                     });
                 }
 
                 responsePayload = generateCardsPaymentResponse(paymentIntent);
-            } else if (yuansferPaymentInstrument && yuansferPaymentInstrument.paymentMethod === 'STRIPE_WECHATPAY') {
-                Transaction.wrap(function () {
-                    basket.custom.yuansferWeChatQRCodeURL = yuansferPaymentInstrument.custom.yuansferWeChatQRCodeURL;
-                    basket.custom.yuansferIsPaymentIntentInReview = true;
-                });
-
-                responsePayload = {
-                    success: true
-                };
-            } else {
-                responsePayload = {
-                    success: true
-                };
-            }
+            } else if (yuansferPaymentInstrument){
+                responsePayload = checkoutHelper.createSecurePay(params);
+                if(yuansferPaymentInstrument.paymentMethod === 'YUANSFER_WECHATPAY') {
+                    Transaction.wrap(function () {
+                        basket.custom.yuansferWeChatQRCodeURL = responsePayload.result;
+                        basket.custom.yuansferIsPaymentInReview = true;
+                    });
+                } else if(yuansferPaymentInstrument.paymentMethod === 'YUANSFER_ALIPAY') {
+                    Transaction.wrap(function () {
+                        basket.custom.yuansferAlipayQRCodeURL = responsePayload.result;
+                        basket.custom.yuansferIsPaymentInReview = true;
+                    });
+                }else if(yuansferPaymentInstrument.paymentMethod === 'YUANSFER_KAKAOPAY') {
+                    Transaction.wrap(function () {
+                        basket.custom.yuansferKakaoPayQRCodeURL = responsePayload.result;
+                        basket.custom.yuansferIsPaymentInReview = true;
+                    });
+                }else if(yuansferPaymentInstrument.paymentMethod === 'YUANSFER_ALIPAYHK') {
+                    Transaction.wrap(function () {
+                        basket.custom.yuansferAlipayHKQRCodeURL = responsePayload.result;
+                        basket.custom.yuansferIsPaymentInReview = true;
+                    });
+                }else if(yuansferPaymentInstrument.paymentMethod === 'YUANSFER_GCASH') {
+                    Transaction.wrap(function () {
+                        basket.custom.yuansferGCashQRCodeURL = responsePayload.result;
+                        basket.custom.yuansferIsPaymentInReview = true;
+                    });
+                }else if(yuansferPaymentInstrument.paymentMethod === 'YUANSFER_DANA') {
+                    Transaction.wrap(function () {
+                        basket.custom.yuansferDanaQRCodeURL = responsePayload.result;
+                        basket.custom.yuansferIsPaymentInReview = true;
+                    });
+                }
+            }  
         }
     } catch (e) {
         if (e.callResult) {
@@ -147,6 +165,7 @@ function handleAPM(sfra) {
 
     return redirectUrl;
 }
-
 exports.HandleAPM = handleAPM;
 exports.HandleAPM.public = true;
+
+
