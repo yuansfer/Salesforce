@@ -59,24 +59,6 @@ exports.getYuansferStoreNo = function () {
 };
 
 /**
-* Gets the Yuansfer Env from Site Preferences.
-*
-* @returns {string} Yuansfer Env.
-*/
-exports.getYuansferEnv = function () {
-    return require('dw/system/Site').current.preferences.custom.yuansferEnv;
-};
-
-/**
-* Gets the URL from where Yuansfer.js can be loaded.
-*
-* @returns {string} Yuansfer.js URL
-*/
-exports.getYuansferScriptUrl = function () {
-    return require('dw/system/Site').current.preferences.custom.yuansferScriptUrl;
-};
-
-/**
  * Returns Yuansfer allowed payment methods
  *
  * @param {dw.util.Collection} applicablePaymentMethods - SFCC payment methods

@@ -25,6 +25,7 @@
 <input type="hidden" id="yuansfer_site_id" value="${require('*/cartridge/scripts/yuansfer/helpers/checkoutHelper').getSiteID()}">
 <input type="hidden" id="yuansfer_order_number" value="${require('*/cartridge/scripts/yuansfer/helpers/checkoutHelper').getNewYuansferOrderNumber()}">
 <input type="hidden" id="yuansfer_callback_url" value="${URLUtils.https("YuansferPayments-ConfirmPayment")}">
+<input type="hidden" id="yuansfer_return_url_in_checkout" value="${URLUtils.https("YuansferPayments-HandleAPM")}">
 
 <input type="hidden" id="yuansfer_order_items" value="${yuansferOrder.order_items}">
 

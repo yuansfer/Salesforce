@@ -25,7 +25,7 @@
 }
 
 /* The Modal (background) */
-.ckoModal {
+.yuansferModal {
     display: none; /* Hidden by default */
     position: fixed; /* Stay in place */
     left: 0;
@@ -38,7 +38,7 @@
 }
   
 /* Modal Content/Box */
-.ckoModal .modal-content {
+.yuansferModal .modal-content {
     background-color: #fefefe;
     margin: 15% auto; /* 15% from the top and centered */
     padding: 1.2em;
@@ -47,29 +47,29 @@
 }
   
 /* The Close Button */
-.ckoModal .close {
+.yuansferModal .close {
     color: #aaa;
     float: right;
     font-size: 1.6em;
     font-weight: bold;
 }
   
-.ckoModal .close:hover,
-.ckoModal .close:focus {
+.yuansferModal .close:hover,
+.yuansferModal .close:focus {
     color: black;
     text-decoration: none;
     cursor: pointer;
 }
 
-.ckoAction {
+.yuansferAction {
     min-width: 5em;
 }
 
-.ckoSuccessMessage {
+.yuansferSuccessMessage {
     margin-top: 1.2em;
     display: none;
 }
 
-.ckoLocked {
+.yuansferLocked {
     text-align: center;
 }

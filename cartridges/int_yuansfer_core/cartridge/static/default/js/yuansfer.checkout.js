@@ -14,6 +14,7 @@ var cardExpYearInput = document.getElementById('yuansfer_card_expiration_year');
 
 var placeOrderButton = document.querySelector('button[name=submit]');
 var forceSubmit = false;
+var prUsed = false;
 
 function isSavedCard() {
     return newCardFormContainer && newCardFormContainer.style.display === 'none';
@@ -127,6 +128,22 @@ function populateBillingData(pr) {
     stateElement.value = pr.paymentMethod.billing_details.address.state;
 }
 
+function getOwnerDetails() {
+    var stateElement = document.querySelector('select[name$="_state"]') || document.querySelector('input[name$="_state"]');
+    return {
+        name: document.querySelector('input[name$="_firstName"]').value + ' ' + document.querySelector('input[name$="_lastName"]').value,
+        address: {
+            line1: document.querySelector('input[name$="_address1"]').value,
+            city: document.querySelector('input[name$="_city"]').value,
+            postal_code: document.querySelector('input[name$="_postal"]').value,
+            country: document.querySelector('select[name$="_country"]').value,
+            state: stateElement ? stateElement.value : ''
+        },
+        email: document.querySelector('input[name$="_email_emailAddress"]').value,
+        phone: document.querySelector('input[name$="_phone"]').value
+    };
+}
+
 function calculateVerifySign(contents,token) {
     //1.对参数进行排序，然后用a=1&b=2..的形式拼接
     var sortArray = [];
@@ -203,35 +220,55 @@ function processSecurePayResult(result) {
     }
 }
 
+function placeHolderOption(text) {
+    const optionElement = document.createElement('option');
+    optionElement.selected = 'selected';
+    optionElement.disabled = 'disabled';
+    optionElement.hidden = 'hidden';
+    optionElement.value = '';
+    optionElement.innerHTML = text;
+    return optionElement;
+  }
+
 document.querySelector('button.submit-payment').addEventListener('click', function (event) {
-    var activeTabId = $('.tab-pane.active').attr('id');
-    var paymentInfoSelector = '#dwfrm_billing .' + activeTabId + ' .payment-form-fields input.form-control';
-    var selectedPaymentMethod = $(paymentInfoSelector).val();
-    window.localStorage.setItem('yuansfer_payment_method', selectedPaymentMethod);
+
+    $.spinner().start();
     
-    if (forceSubmit) return true;
-    var currentParams = getGlobalParams();
-    var token = $('[name="csrf_token"]').val();
-    $.ajax({
-        url: document.getElementById('beforePaymentAuthURL').value,
-        type: 'POST',
-        dataType:"json",
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-            'params':currentParams
-        },
-        data: {
-            'csrf_token':token
-        }
-    }).done(function (json) {
+    let yuansferReturnURL = document.getElementById('yuansfer_return_url_in_checkout').value;
+    window.location.replace(yuansferReturnURL);
+    
+    window.setTimeout(()=>{
+        var activeTabId = $('.tab-pane.active').attr('id');
+        var paymentInfoSelector = '#dwfrm_billing .' + activeTabId + ' .payment-form-fields input.form-control';
+        var selectedPaymentMethod = $(paymentInfoSelector).val();
+        window.localStorage.setItem('yuansfer_payment_method', selectedPaymentMethod);
         
-    }).fail(function (msg) {
-        if (msg.responseJSON.redirectUrl) {
-            window.location.href = msg.responseJSON.redirectUrl;
-        } else {
-            alert(msg.error);
-        }
-    });   
+        if (forceSubmit) return true;
+        var currentParams = getGlobalParams();
+        var token = $('[name="csrf_token"]').val();
+        $.ajax({
+            url: document.getElementById('beforePaymentAuthURL').value,
+            type: 'POST',
+            dataType:"json",
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'params':currentParams
+            },
+            data: {
+                'csrf_token':token
+            }
+        }).done(function (json) {
+            $.spinner().stop();
+        }).fail(function (msg) {
+            if (msg.responseJSON.redirectUrl) {
+                window.location.href = msg.responseJSON.redirectUrl;
+            } else {
+                alert(msg.error);
+            }
+        });   
+
+    },200)
+
 });
 
 function getGlobalParams() {
@@ -239,6 +276,7 @@ function getGlobalParams() {
     var selectedPaymentMethod = window.localStorage.getItem('yuansfer_payment_method');
     // var params = getSecurePayPayload();
     let params;
+
     
     switch (selectedPaymentMethod) {
         case 'CREDIT_CARD':
@@ -275,7 +313,7 @@ function getGlobalParams() {
             params = getSecurePayPayload("wechatpay")
             break;
         case 'YUANSFER_ALIPAY':
-            params = getSecurePayPayload("wechatpay")
+            params = getSecurePayPayload("alipay")
             break;
         case 'YUANSFER_DANA':
 
@@ -347,29 +385,41 @@ function handleServerResponse(response) {
 }
 
 // document.querySelector('button.place-order').addEventListener('click', function (event) {
-//     if (forceSubmit) return true;
-//     var currentParams = getGlobalParams();
-//     var token = $('[name="csrf_token"]').val();
-//     $.ajax({
-//         url: document.getElementById('beforePaymentAuthURL').value,
-//         type: 'POST',
-//         dataType:"json",
-//         headers: {
-//             'X-Requested-With': 'XMLHttpRequest'
-//         },
-//         data: {
-//             'csrf_token':token,
-//             'params':currentParams
-//         }
-//     }).done(function (json) {
-//         handleServerResponse(json);
-//     }).fail(function (msg) {
-//         if (msg.responseJSON.redirectUrl) {
-//             window.location.href = msg.responseJSON.redirectUrl;
-//         } else {
-//             alert(msg.error);
-//         }
-//     });   
+//         event.preventDefault();
+//         const curButton = document.querySelector('button.place-order');
+//         let saveAction = curButton.dataset.action;
+//         curButton.dataset.action = '';
+//         var activeTabId = $('.tab-pane.active').attr('id');
+//         var paymentInfoSelector = '#dwfrm_billing .' + activeTabId + ' .payment-form-fields input.form-control';
+//         var selectedPaymentMethod = $(paymentInfoSelector).val();
+//         window.localStorage.setItem('yuansfer_payment_method', selectedPaymentMethod);
+        
+//         if (forceSubmit) return true;
+//         var currentParams = getGlobalParams();
+//         var token = $('[name="csrf_token"]').val();
+//         $.ajax({
+//             url: document.getElementById('beforePaymentAuthURL').value,
+//             type: 'POST',
+//             dataType:"json",
+//             headers: {
+//                 'X-Requested-With': 'XMLHttpRequest',
+//                 'params':currentParams
+//             },
+//             data: {
+//                 'csrf_token':token
+//             }
+//         }).done(function (json) {
+//             // place order
+//             curButton.dataset.action = saveAction;
+//             // dataset
+//             curButton.click();
+//         }).fail(function (msg) {
+//             if (msg.responseJSON.redirectUrl) {
+//                 window.location.href = msg.responseJSON.redirectUrl;
+//             } else {
+//                 alert(msg.error);
+//             }
+//         });  
 // });
 
 function processQRCodeResult(result,vendor) {

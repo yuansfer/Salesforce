@@ -50,12 +50,12 @@
                 
                 <isif condition="${isWeChatPay}">
                 	<isinclude template="checkout/wechatpayqrcode" />
-                <iselseif condition="${isAlipayPay}"/>
+                <iselseif condition="${isAlipay}"/>
                 	<isinclude template="checkout/alipayqrcode" />
                 <iselseif condition="${isAlipayHK}"/>
                 	<isinclude template="checkout/alipayhkqrcode" />
                 <iselseif condition="${isDana}"/>
-                	<isinclude template="checkout/alipayqrcode" />
+                	<isinclude template="checkout/danaqrcode" />
                 <iselseif condition="${isKakaoPay}"/>
                 	<isinclude template="checkout/kakaopayqrcode" />
                 <iselseif condition="${isGCash}"/>

@@ -10,12 +10,12 @@ var Logger = require('dw/system/Logger');
 var Site = require('dw/system/Site');
 
 // Card Currency Config
-var ckoCurrencyConfig = require('~/cartridge/scripts/config/ckoCurrencyConfig');
+// var yuansferCurrencyConfig = require('~/cartridge/scripts/config/yuansferCurrencyConfig');
 
 /**
- * Helper functions for the Checkout.com cartridge integration.
+ * Helper functions for the cartridge integration.
  */
-var CKOHelper = {
+var YuansferHelper = {
     /**
      * Handles string translation with language resource files.
      * @param {string} strValue The strin to translate
@@ -27,10 +27,10 @@ var CKOHelper = {
     },
 
     /**
-     * Get the Checkout.com orders.
+     * Get the orders.
      * @returns {array} Retuns the orders array
      */
-    getCkoOrders: function() {
+    getYuansferOrders: function() {
         // Prepare the output array
         var data = [];
 
@@ -46,7 +46,7 @@ var CKOHelper = {
 
             // Loop through the payment instruments
             for (var i = 0; i < paymentInstruments.length; i++) {
-                if (this.isCkoItem(paymentInstruments[i].paymentMethod) && !this.containsObject(item, data)) {
+                if (this.isYuansferItem(paymentInstruments[i].paymentMethod) && !this.containsObject(item, data)) {
                     data.push(item);
                 }
             }
@@ -56,15 +56,15 @@ var CKOHelper = {
     },
 
     /**
-     * Get the Checkout.com transactions.
+     * Get the transactions.
      * @returns {array} Retuns the transactions array
      */
-    getCkoTransactions: function() {
+    getYuansferTransactions: function() {
         // Prepare the output array
         var data = [];
 
         // Query the orders
-        var result = this.getCkoOrders();
+        var result = this.getYuansferOrders();
 
         // Loop through the results
         var i = 1;
@@ -84,8 +84,8 @@ var CKOHelper = {
                         id: i,
                         order_no: result[j].orderNo,
                         transaction_id: paymentTransaction.transactionID,
-                        payment_id: paymentTransaction.custom.ckoPaymentId,
-                        opened: paymentTransaction.custom.ckoTransactionOpened,
+                        payment_id: paymentTransaction.custom.yuansferPaymentId,
+                        opened: null,//paymentTransaction.custom.yuansferTransactionOpened, 
                         amount: paymentTransaction.amount.value,
                         currency: paymentTransaction.amount.currencyCode,
                         creation_date: paymentTransaction.getCreationDate().toDateString(),
@@ -159,7 +159,7 @@ var CKOHelper = {
         var condition1 = (tid && paymentTransaction.transactionID === tid) || !tid;
         var condition2 = this.isCkoItem(paymentInstrument.paymentMethod);
         var condition3 = this.isCkoItem(this.getProcessorId(paymentInstrument));
-        var condition4 = paymentTransaction.custom.ckoPaymentId !== null && paymentTransaction.custom.ckoPaymentId !== '';
+        var condition4 = paymentTransaction.custom.yuansferPaymentId !== null && paymentTransaction.custom.yuansferPaymentId !== '';
         var condition5 = paymentTransaction.transactionID && paymentTransaction.transactionID !== '';
 
         if (condition1 && condition2 && condition3 && condition4 && condition5) {
@@ -170,12 +170,12 @@ var CKOHelper = {
     },
 
     /**
-     * Checks if a payment instrument is Checkout.com.
+     * Checks if a payment instrument is.
      * @param {Object} item The payment instrument
      * @returns {boolean} The status of the current payment instrument
      */
-    isCkoItem: function(item) {
-        return item.length > 0 && item.indexOf('CHECKOUTCOM_') >= 0;
+    isYuansferItem: function(item) {
+        return item.length > 0 && (item.indexOf('YUANSFER_APM') >= 0);
     },
 
     /**
@@ -228,41 +228,14 @@ var CKOHelper = {
      * @param {Object} gatewayData The gateway data
      */
     log: function(dataType, gatewayData) {
-        if (this.getValue('ckoDebugEnabled') === 'true' && (gatewayData)) {
+        if ((gatewayData)) {
             // Get the logger
-            var logger = Logger.getLogger('ckodebug');
-
-            // Remove sensitive data
-            // eslint-disable-next-line
-            gatewayData = this.removeSentisiveData(gatewayData);
+            var logger = Logger.getLogger('yuansferdebug');
 
             if (logger) {
-                logger.debug(this._('cko.gateway.name', 'cko') + ' ' + dataType + ' : {0}', gatewayData);
+                logger.debug(this._('yuansfer.gateway.name', 'yuansferbm') + ' ' + dataType + ' : {0}', gatewayData);
             }
         }
-    },
-
-    /**
-     * Remove sentitive data from the logs.
-     * @param {Object} data The raw gateway data
-     * @returns {Object} The clean gateway data
-     */
-    removeSentisiveData: function(data) {
-        // Card data
-        if (Object.prototype.hasOwnProperty.call(data, 'source')) {
-            if (Object.prototype.hasOwnProperty.call(data.source, 'source')) data.source.number.replace(/^.{14}/g, '*');
-            if (Object.prototype.hasOwnProperty.call(data.source, 'cvv')) data.source.cvv.replace(/^.{3}/g, '*');
-            if (Object.prototype.hasOwnProperty.call(data.source, 'billing_address')) delete data.source.billing_address; // eslint-disable-line no-param-reassign
-            if (Object.prototype.hasOwnProperty.call(data.source, 'phone')) delete data.source.phone; // eslint-disable-line no-param-reassign
-            if (Object.prototype.hasOwnProperty.call(data.source, 'name')) delete data.source.name; // eslint-disable-line no-param-reassign
-        }
-
-        // Customer data
-        if (Object.prototype.hasOwnProperty.call(data, 'customer')) delete data.customer; // eslint-disable-line no-param-reassign
-        if (Object.prototype.hasOwnProperty.call(data, 'shipping')) delete data.shipping; // eslint-disable-line no-param-reassign
-        if (Object.prototype.hasOwnProperty.call(data, 'billing')) delete data.billing; // eslint-disable-line no-param-reassign
-
-        return data;
     },
 
     /**
@@ -320,8 +293,8 @@ var CKOHelper = {
     getFormattedPrice: function(amount, currency) {
         var totalFormated;
         if (currency) {
-            var ckoFormateBy = this.getCkoFormatedValue(currency);
-            totalFormated = amount * ckoFormateBy;
+            var yuansferFormateBy = this.getCkoFormatedValue(currency);
+            totalFormated = amount * yuansferFormateBy;
     
             return totalFormated.toFixed();
         } else {
@@ -336,49 +309,30 @@ var CKOHelper = {
      * @returns {number} The conversion factor
      */
     getCkoFormatedValue: function(currency) {
-        if (ckoCurrencyConfig.x1.currencies.match(currency)) {
-            return ckoCurrencyConfig.x1.multiple;
-        } else if (ckoCurrencyConfig.x1000.currencies.match(currency)) {
-            return ckoCurrencyConfig.x1000.multiple;
+        if (yuansferCurrencyConfig.x1.currencies.match(currency)) {
+            return yuansferCurrencyConfig.x1.multiple;
+        } else if (yuansferCurrencyConfig.x1000.currencies.match(currency)) {
+            return yuansferCurrencyConfig.x1000.multiple;
         }
         return 100;
     },
 
-    /**
-     * The cartridge metadata.
-     * @returns {string} The platform metadata
-     */
-    getCartridgeMeta: function() {
-        return this.getValue('ckoBmPlatformData');
+    getYuansferToken : function(){
+        return require('dw/system/Site').current.preferences.custom.yuansferToken;
     },
 
-    /**
-     * Retrieves a custom preference value from the configuration.
-     * @param {string} fieldName The configuration field name
-     * @returns {string} The configuration field value
-     */
-    getValue: function(fieldName) {
-        return Site.getCurrent().getCustomPreferenceValue(fieldName);
+    getYuansferStoreNo : function(){
+        return require('dw/system/Site').current.preferences.custom.yuansferStoreNo;
     },
 
-    /**
-     * Get live or sandbox account keys.
-     * @returns {Object} The configuration account keys
-     */
-    getAccountKeys: function() {
-        var keys = {};
-        var str = this.getValue('ckoMode') === 'live' ? 'Live' : 'Sandbox';
-
-        keys.publicKey = this.getValue('cko' + str + 'PublicKey');
-        keys.secretKey = this.getValue('cko' + str + 'SecretKey');
-        keys.privateKey = this.getValue('cko' + str + 'PrivateKey');
-
-        return keys;
-    },
+    getYuansferMerchantNo : function(){
+        return require('dw/system/Site').current.preferences.custom.yuansferMerchantNo;
+    }
+    
 };
 
 /*
  * Module exports
  */
 
-module.exports = CKOHelper;
+module.exports = YuansferHelper;

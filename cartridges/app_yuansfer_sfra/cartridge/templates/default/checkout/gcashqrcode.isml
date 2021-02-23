@@ -24,11 +24,11 @@
 	  else document.addEventListener("DOMContentLoaded", callback);
 	}
 	
-	ready(() => { 
-	  var elem = document.createElement("img");
+   ready(() => { 
+        var elem = document.createElement("img");
         elem.setAttribute("height", "100");
         elem.setAttribute("width", "100");
-        elem.src= "https://yuansfer1.oss-accelerate.aliyuncs.com/images/securepayQrcode/qrcode_200043_103799860745795328.jpg";
+        elem.src= "${yuansferGCashQRCodeURL}";
 	    document.getElementById("gcashQRCode").appendChild(elem);
 	});
 

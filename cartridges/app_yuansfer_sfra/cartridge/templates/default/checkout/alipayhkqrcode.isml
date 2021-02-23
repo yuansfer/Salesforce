@@ -12,7 +12,6 @@
     <h1>${Resource.msg('alipayhk.completeyourorder', 'yuansfer', null)}</h1>
 
     <p>${Resource.msg('alipayhk.scanqrcode', 'yuansfer', null)} ${pdict.order.totals.grandTotal}</p>
-    
     <div id="alipayhkQRCode"></div>
     
 </div>
@@ -24,11 +23,11 @@
 	  else document.addEventListener("DOMContentLoaded", callback);
 	}
 	
-	ready(() => { 
-	  var elem = document.createElement("img");
+  ready(() => { 
+        var elem = document.createElement("img");
         elem.setAttribute("height", "100");
         elem.setAttribute("width", "100");
-        elem.src= "https://yuansfer1.oss-accelerate.aliyuncs.com/images/securepayQrcode/qrcode_200043_103799860745795328.jpg";
+        elem.src= "${yuansferAlipayHKQRCodeURL}";
 	    document.getElementById("alipayhkQRCode").appendChild(elem);
 	});
 

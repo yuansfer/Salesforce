@@ -1,23 +1,23 @@
-.ckoModal h1 {
+.yuansferModal h1 {
     font-size: 1.4em;
 }
 
-.ckoModal .label {
+.yuansferModal .label {
     color: black;
     padding-left: 0em;
     font-size: 0.8em;
 }
 
-.ckoModal .input-row {
+.yuansferModal .input-row {
     margin-top: 1.4em;
     margin-bottom: 1.9em;
 }
 
-.ckoErrorMessage, .ckoInvalidAmount {
+.yuansferErrorMessage, .yuansferInvalidAmount {
     margin-top: 1.4em;
     display: none;
 }
 
-.ckoErrorMessage .msg, .ckoInvalidAmount .msg {
+.yuansferErrorMessage .msg, .yuansferInvalidAmount .msg {
     display: inline;
 }
