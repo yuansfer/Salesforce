@@ -3,11 +3,16 @@
         var assets = require('*/cartridge/scripts/assets.js');
         assets.addCss('/css/checkout/checkout.css');
         assets.addJs('/js/checkoutRegistration.js');
+        assets.addJs('/js/yuansfer.confirm.js');
     </isscript>
     <isset name="isConfirmation" value="true" scope="page" />
     <isif condition="${pdict.reportingURLs && pdict.reportingURLs.length}">
         <isinclude template="reporting/reportingUrls" />
     </isif>
+
+    <input type="hidden" id="yuansfer_handle_confirm_url" value="${URLUtils.https('YuansferPayments-HandleConfirm')}" />
+    <input type="hidden" id="yuansfer_order_number" value="${pdict.order.orderNumber}" />
+    <input type="hidden" id="yuansfer_home_show" value="${URLUtils.https('Home-Show')}" />
 
     <div class="hero slant-down hero-confirmation">
         <h1 class="page-title">${Resource.msg('title.thank.you.page','confirmation',null)}</h1>

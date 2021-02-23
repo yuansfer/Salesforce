@@ -18,22 +18,22 @@ server.post('BeforePaymentAuthorization',server.middleware.https, csrfProtection
 });
 
 /**
- * An callback entry point to handle returns from payment.
+ * Entry point for handling transaction search.
  */
+server.get('HandleConfirm',function (req, res, next) {
+    
+    var params = JSON.parse( req.httpHeaders.params);
+    var responsePayload = yuansferPaymentsHelper.SearchTransaction(params);
+    if(responsePayload.ret_code == "000100"){
+        if(responsePayload.result.status == "success"){
+            var placeOrderParams = params;
+            params['transactionNo'] = responsePayload.result.transactionNo;
+            const confirmPaymentHelper = require('*/cartridge/scripts/yuansfer/helpers/confirmPaymentHelper');
+            var success = confirmPaymentHelper.processIncomingNotification(params);
+        }
+    }
+    res.json(responsePayload);
 
-server.get('ConfirmPayment', function (req, res, next) {
-    const payload = req.httpHeaders["x-is-query_string"];
-    const confirmPaymentHelper = require('*/cartridge/scripts/yuansfer/helpers/confirmPaymentHelper');
-    var success = confirmPaymentHelper.processIncomingNotification(payload);
-
-    res.setStatusCode(success ? 200 : 500);
-    res.json({
-        success: !!success
-    });
-    // if(success){
-    //     var URLUtils = require('dw/web/URLUtils');
-    //     res.redirect(URLUtils.url('Home-Show'));
-    // }
     next();
 });
 

@@ -239,7 +239,6 @@ function getGlobalParams() {
     var selectedPaymentMethod = window.localStorage.getItem('yuansfer_payment_method');
     // var params = getSecurePayPayload();
     let params;
-
     
     switch (selectedPaymentMethod) {
         case 'CREDIT_CARD':

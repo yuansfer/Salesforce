@@ -10,38 +10,18 @@
  * @param {Object} intent - PaymentIntent object
  * @return {Object} - Response payload to return to client
  */
-function generateCardsPaymentResponse(intent) {
-    const yuansferChargeCapture = dw.system.Site.getCurrent().getCustomPreferenceValue('yuansferChargeCapture');
+function searchTransaction(params) {
     var responsePayload;
-    if (intent.status === 'requires_capture' && !yuansferChargeCapture) {
-        // The payment requires capture which will be made later
-        responsePayload = {
-            success: true
-        };
-    } else if (
-        intent.status === 'requires_action' &&
-        intent.next_action.type === 'use_yuansfer_sdk'
-    ) {
-        // Tell the client to handle the action
-        responsePayload = {
-            requires_action: true,
-            payment_intent_client_secret: intent.client_secret
-        };
-    } else if (intent.status === 'succeeded') {
-        // The payment didn’t need any additional actions and completed!
-        // Handle post-payment fulfilment
-        responsePayload = {
-            success: true
-        };
-    } else {
-        // Invalid status
-        responsePayload = {
-            error: 'Invalid PaymentIntent status'
-        };
+    const yuansferService = require('*/cartridge/scripts/yuansfer/services/yuansferService');
+
+    if(params){
+        responsePayload = yuansferService.tranQuery(params);
     }
 
     return responsePayload;
 }
+
+exports.SearchTransaction = searchTransaction;
 
 /**
  * Entry point for handling payment creation and confirmation AJAX calls.

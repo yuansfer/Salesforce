@@ -236,15 +236,14 @@ exports.securePay = {
     },
 };
 
-// https://mapi.yuansfer.com/app-data-search/v3/cancel
-exports.refunds = {
+//https://mapi.yuansfer.com/app-data-search/v3/tran-query
+exports.transQuery = {
     create: function (params) {
         var requestObject = {
-            endpoint: '/app-data-search/v3/cancel',
+            endpoint: '/app-data-search/v3/tran-query',
             httpMethod: 'POST',
             payload: params
         };
-
         return callService(requestObject);
     },
 };
