@@ -8,9 +8,8 @@ var PaymentTransaction = require('dw/order/PaymentTransaction');
 var Resource = require('dw/web/Resource');
 var Logger = require('dw/system/Logger');
 var Site = require('dw/system/Site');
-
-// Card Currency Config
-// var yuansferCurrencyConfig = require('~/cartridge/scripts/config/yuansferCurrencyConfig');
+var Transaction = require('dw/system/Transaction');
+var Money = require('dw/value/Money');
 
 /**
  * Helper functions for the cartridge integration.
@@ -287,6 +286,33 @@ var YuansferHelper = {
         }
     },
 
+    setPaymentStatus: function(order) {
+        var paymentInstruments = order.getPaymentInstruments().toArray(),
+            amountPaid = 0,
+            orderTotal = order.getTotalGrossPrice().getValue();
+    
+        for(var i=0; i<paymentInstruments.length; i++) {
+            var paymentTransaction = paymentInstruments[i].paymentTransaction;
+            if(paymentTransaction.type.value === 'CAPTURE') {
+                amountPaid += paymentTransaction.amount.value;
+                if(amountPaid > orderTotal) {
+                    amountPaid = orderTotal;
+                }
+            } else if(paymentTransaction.type.value === 'CREDIT') {
+                amountPaid -= paymentTransaction.amount.value;
+            }
+        }
+    
+        if(amountPaid === orderTotal) {
+            order.setPaymentStatus(order.PAYMENT_STATUS_PAID);
+        } else if(amountPaid >= 0.01) {
+            order.setPaymentStatus(order.PAYMENT_STATUS_PARTPAID);
+        } else {
+            order.setPaymentStatus(order.PAYMENT_STATUS_NOTPAID);
+        }
+    
+    },
+
     /**
      * Currency conversion mapping.
      * @param {string} currency The currency code
@@ -299,6 +325,34 @@ var YuansferHelper = {
             return yuansferCurrencyConfig.x1000.multiple;
         }
         return 100;
+    },
+
+    paymentRefunded: function(params) {
+
+        // Load the order
+        var order = OrderMgr.getOrder(params.orderNumber);
+
+        // Get the payment processor id
+        var paymentProcessorId = order.paymentInstrument.paymentTransaction.paymentProcessor.ID;
+        // Create the refunded transaction
+        Transaction.wrap(function() {
+            try{
+                var paymentInstrument = order.addNote(paymentProcessorId,'233');
+            } catch(e){
+                var a = e;
+                alert(e);
+            }
+            
+
+            paymentInstrument.paymentTransaction.transactionID = params.orderNumber;
+            paymentInstrument.paymentTransaction.paymentProcessor = paymentProcessorId;
+            paymentInstrument.paymentTransaction.custom.yuansferOrderNumber = params.orderNumber;
+            paymentInstrument.paymentTransaction.custom.yuansferTransactionOpened = false;
+            paymentInstrument.paymentTransaction.setType(PaymentTransaction.TYPE_CREDIT);
+
+            this.setPaymentStatus(order);
+
+        });
     },
 
     getYuansferToken : function(){

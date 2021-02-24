@@ -190,7 +190,7 @@ function calculateVerifySign(contents,token) {
     var param = {
         merchantNo: merchantNo,
         storeNo: storeNo,
-        amount: 0.01,  
+        amount: amountToPay,  
         // amount: amountToPay,                       
         currency: currencyCode,    
         settleCurrency: currencyCode,    
@@ -304,6 +304,10 @@ function getGlobalParams() {
                     }
                 });
             }
+            break;
+        case 'YUANSFER_CREDITCARD':
+
+            params = getSecurePayPayload("creditcard")
             break;
         case 'YUANSFER_WECHATPAY':
             

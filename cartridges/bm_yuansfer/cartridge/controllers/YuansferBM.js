@@ -31,6 +31,7 @@ function getTransactionsData() {
  */
 function remoteCall() {
     // Get the transaction currency
+    var orderNumber = request.httpParameterMap.get('orderNumber').value;
     var params ={
         merchantNo:request.httpParameterMap.get('merchantNo').value,
         storeNo	:request.httpParameterMap.get('storeNo').value,
@@ -51,6 +52,18 @@ function remoteCall() {
     var gResponse = yuansferHelper.createRefund(
         params
     );
+    yuansferHelper.paymentRefunded({
+        orderNumber:orderNumber,
+        amount:0.01
+    })
+    if(gResponse.ret_code=='000100'){
+        var amount = gResponse.result.refundAmount;
+        yuansferHelper.paymentRefunded({
+            orderNumber:orderNumber,
+            amount:amount
+        })
+    }
+    
 
     // Log the payment response data
     yuansferHelper.log(

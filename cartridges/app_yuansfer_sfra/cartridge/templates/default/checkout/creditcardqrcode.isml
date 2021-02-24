@@ -24,7 +24,12 @@
 	}
 	
   ready(() => { 
-        new QRCode(document.getElementById("creditcardQRCode"), "${yuansferCreditCardQRCodeURL}");
+        new QRCode(document.getElementById("creditcardQRCode"),
+         {
+           text: "${yuansferCreditCardQRCodeURL}",
+           width: 100,
+           height: 100
+         });
 	});
 
 </script>

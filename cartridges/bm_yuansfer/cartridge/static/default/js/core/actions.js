@@ -183,7 +183,7 @@ function performAction(task) {
     var merchantNo = document.getElementById('yuansfer_merchant_no').value;
     var storeNo = document.getElementById('yuansfer_store_no').value;
     var token = document.getElementById('yuansfer_token').value;
-    
+    var orderNumber = jQuery('[id="' + task + '_order_no"]').text();
     // Prepare the action data
     var data = {
         merchantNo: merchantNo,
@@ -195,6 +195,7 @@ function performAction(task) {
     };
     var verifySign = calculateVerifySign(data,token);
     data['verifySign'] = verifySign;
+    data['orderNumber'] = orderNumber;
 
     // Send the AJAX request
     jQuery.ajax({

@@ -67,6 +67,7 @@ function beforePaymentAuthorization(params) {
             var yuansferPaymentInstrument = checkoutHelper.getYuansferPaymentInstrument(basket);
 
             if (yuansferPaymentInstrument && yuansferPaymentInstrument.paymentMethod === 'CREDIT_CARD') {
+                
                 var paymentIntent;
                 var paymentIntentId = (yuansferPaymentInstrument.paymentTransaction) ?
                     yuansferPaymentInstrument.paymentTransaction.getTransactionID() : null;
@@ -87,34 +88,44 @@ function beforePaymentAuthorization(params) {
                 }
 
                 responsePayload = generateCardsPaymentResponse(paymentIntent);
-            } else if (yuansferPaymentInstrument){
+                
+            } 
+            else if (yuansferPaymentInstrument){
                 responsePayload = checkoutHelper.createSecurePay(params);
-                if(yuansferPaymentInstrument.paymentMethod === 'YUANSFER_WECHATPAY') {
+                let paymentMethod = yuansferPaymentInstrument.paymentMethod;
+                if(paymentMethod === 'YUANSFER_WECHATPAY') {
                     Transaction.wrap(function () {
                         basket.custom.yuansferWeChatPayQRCodeURL = responsePayload.result.qrcodeUrl;
                         basket.custom.yuansferIsPaymentInReview = true;
                     });
-                } else if(yuansferPaymentInstrument.paymentMethod === 'YUANSFER_ALIPAY') {
+                }else if(paymentMethod === 'YUANSFER_CREDITCARD'){
+                    //跳转到yuasnfer 信用卡收银台支付
+                    Transaction.wrap(function () {
+                        basket.custom.yuansferCreditCardQRCodeURL = responsePayload.result.cashierUrl;
+                        basket.custom.yuansferIsPaymentInReview = true;
+                    });
+                } 
+                else if(paymentMethod === 'YUANSFER_ALIPAY') {
                     Transaction.wrap(function () {
                         basket.custom.yuansferAlipayQRCodeURL = responsePayload.result.qrcodeUrl;
                         basket.custom.yuansferIsPaymentInReview = true;
                     });
-                }else if(yuansferPaymentInstrument.paymentMethod === 'YUANSFER_KAKAOPAY') {
+                }else if(paymentMethod === 'YUANSFER_KAKAOPAY') {
                     Transaction.wrap(function () {
                         basket.custom.yuansferKakaoPayQRCodeURL = responsePayload.result.qrcodeUrl;
                         basket.custom.yuansferIsPaymentInReview = true;
                     });
-                }else if(yuansferPaymentInstrument.paymentMethod === 'YUANSFER_ALIPAYHK') {
+                }else if(paymentMethod === 'YUANSFER_ALIPAYHK') {
                     Transaction.wrap(function () {
                         basket.custom.yuansferAlipayHKQRCodeURL = responsePayload.result.qrcodeUrl;
                         basket.custom.yuansferIsPaymentInReview = true;
                     });
-                }else if(yuansferPaymentInstrument.paymentMethod === 'YUANSFER_GCASH') {
+                }else if(paymentMethod === 'YUANSFER_GCASH') {
                     Transaction.wrap(function () {
                         basket.custom.yuansferGCashQRCodeURL = responsePayload.result.qrcodeUrl;
                         basket.custom.yuansferIsPaymentInReview = true;
                     });
-                }else if(yuansferPaymentInstrument.paymentMethod === 'YUANSFER_DANA') {
+                }else if(paymentMethod === 'YUANSFER_DANA') {
                     Transaction.wrap(function () {
                         basket.custom.yuansferDanaQRCodeURL = responsePayload.result.qrcodeUrl;
                         basket.custom.yuansferIsPaymentInReview = true;

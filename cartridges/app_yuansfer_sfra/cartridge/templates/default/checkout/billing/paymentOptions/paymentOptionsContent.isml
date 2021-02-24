@@ -33,7 +33,8 @@
 <isloop items="${pdict.order.billing.payment.applicablePaymentMethods}" var="paymentOption">
 
     <isif condition="${paymentOption.ID === 'CREDIT_CARD'}">
-       <isif condition="${yuansferEnabled}">
+        <isinclude template="checkout/billing/paymentOptions/creditCardContent" />
+       <iscomment> <isif condition="${yuansferEnabled}">
             
             <div class="tab-pane active ${paymentOption.ID}-content" id="${paymentOption.ID}-content" role="tabpanel">
                 <fieldset class="payment-form-fields">
@@ -43,12 +44,12 @@
                         value="${paymentOption.ID}"
                     >
                     <input type="hidden" name="cardNumber" value="" class="cardNumber" id="cardNumber">
-                    <iscomment> <isinclude template="default/yuansfer/checkout/billing/sfra_cardform" /> </iscomment>
+                    <isinclude template="default/yuansfer/checkout/billing/sfra_cardform" />
                 </fieldset>
             </div>
         <iselse/>
             <isinclude template="checkout/billing/paymentOptions/creditCardContent" />
-        </isif> 
+        </isif>  </iscomment>
     
     <iselseif condition="${paymentOption.ID === 'YUANSFER_ALIPAY'}"/>
         <isinclude template="checkout/billing/paymentOptions/alipayContent" />
@@ -62,6 +63,8 @@
         <isinclude template="checkout/billing/paymentOptions/alipayhkContent" />
     <iselseif condition="${paymentOption.ID === 'YUANSFER_KAKAOPAY'}"/>
         <isinclude template="checkout/billing/paymentOptions/kakaopayContent" />
+    <iselseif condition="${paymentOption.ID === 'YUANSFER_CREDITCARD'}"/>
+        <isinclude template="checkout/billing/paymentOptions/creditcardContent" />
     <iselse/>
 
         <div class="tab-pane ${paymentOption.ID}-content" id="${paymentOption.ID}-content" role="tabpanel">

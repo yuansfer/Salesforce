@@ -70,8 +70,8 @@ var _Polling =function(_queryUrl, _redirectUrl){
                     if(null != json){
                         var _ret_code = json.ret_code;
                         var _ret_msg = json.ret_msg;
-                        var _status = json.result.status;
                         if (_ret_code=="000100") {
+                            var _status = json.result.status;
                             if  (_status=="fail") {
                                 clearInterval(t);
                                 //document.getElementById("_message").innerText="支付失败";

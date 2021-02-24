@@ -213,7 +213,7 @@ function getButtonsHtml(cell) {
     var html = '';
 
     // Build the action buttons
-    if (JSON.parse(rowData.opened) && rowData.type !== 'CREDIT') {
+    if (JSON.parse(rowData.opened) && rowData.type !== 'CREDIT' && rowData.transaction_id) {
         if (rowData.type === 'CAPTURE') {
             html += '<button type="button" id="refund-button-' + rowData.transaction_id + '" class="btn btn-secondary yuansferAction">' + window.yuansferLang.refund + '</button>';
         }
