@@ -170,7 +170,6 @@ function calculateVerifySign(contents,token) {
   function getSecurePayPayload(vendor) {
     var merchantNo = document.getElementById('yuansfer_merchant_no').value;
     var storeNo = document.getElementById('yuansfer_store_no').value;
-    // var env = document.getElementById('yuansfer_env').value;
     var token = document.getElementById('yuansfer_token').value;
     var yuansferOrderNumberInput = document.getElementById('yuansfer_order_number').value;
     var yuansferCallbackURLInput = document.getElementById('yuansfer_callback_url');
@@ -191,7 +190,6 @@ function calculateVerifySign(contents,token) {
     var param = {
         merchantNo: merchantNo,
         storeNo: storeNo,
-        // env: env,
         amount: 0.01,  
         // amount: amountToPay,                       
         currency: currencyCode,    
@@ -344,45 +342,44 @@ function init() {
     }
 }
 
-function handleServerResponse(response) {
-    if (response.error) {
-        alert(response.error.message);
-        window.location.replace(document.getElementById('billingPageUrl').value);
-    } else if (response.requires_action) {
-        // Use Stripe.js to handle required card action
-        yuansfer.handleCardAction(response.payment_intent_client_secret).then(function (result) {
-            if (result.error) {
-                alert(result.error.message);
-                window.location.replace(document.getElementById('billingPageUrl').value);
-            } else {
-                // The card action has been handled
-                // The PaymentIntent can be confirmed again on the server
-                $.ajax({
-                    url: document.getElementById('beforePaymentAuthURL').value,
-                    method: 'POST',
-                    dataType: 'json',
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    data: {
-                        csrf_token: $('[name="csrf_token"]').val()
-                    }
-                }).done(function (json) {
-                    handleServerResponse(json);
-                }).fail(function (msg) {
-                    if (msg.responseJSON.redirectUrl) {
-                        window.location.href = msg.responseJSON.redirectUrl;
-                    } else {
-                        alert(msg.error);
-                    }
-                });
-            }
-        });
-    } else {
-        forceSubmit = true;
-        placeOrderButton.click();
-    }
-}
+// function handleServerResponse(response) {
+//     if (response.error) {
+//         alert(response.error.message);
+//         window.location.replace(document.getElementById('billingPageUrl').value);
+//     } else if (response.requires_action) {
+//         yuansfer.handleCardAction(response.payment_intent_client_secret).then(function (result) {
+//             if (result.error) {
+//                 alert(result.error.message);
+//                 window.location.replace(document.getElementById('billingPageUrl').value);
+//             } else {
+//                 // The card action has been handled
+//                 // The PaymentIntent can be confirmed again on the server
+//                 $.ajax({
+//                     url: document.getElementById('beforePaymentAuthURL').value,
+//                     method: 'POST',
+//                     dataType: 'json',
+//                     headers: {
+//                         'X-Requested-With': 'XMLHttpRequest'
+//                     },
+//                     data: {
+//                         csrf_token: $('[name="csrf_token"]').val()
+//                     }
+//                 }).done(function (json) {
+//                     handleServerResponse(json);
+//                 }).fail(function (msg) {
+//                     if (msg.responseJSON.redirectUrl) {
+//                         window.location.href = msg.responseJSON.redirectUrl;
+//                     } else {
+//                         alert(msg.error);
+//                     }
+//                 });
+//             }
+//         });
+//     } else {
+//         forceSubmit = true;
+//         placeOrderButton.click();
+//     }
+// }
 
 // document.querySelector('button.place-order').addEventListener('click', function (event) {
 //         event.preventDefault();

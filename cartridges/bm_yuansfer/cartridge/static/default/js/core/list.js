@@ -214,13 +214,6 @@ function getButtonsHtml(cell) {
 
     // Build the action buttons
     if (JSON.parse(rowData.opened) && rowData.type !== 'CREDIT') {
-        // Capture
-        if (rowData.type === 'AUTH') {
-            html += '<button type="button" id="void-button-' + rowData.transaction_id + '" class="btn btn-default yuansferAction">' + window.yuansferLang.void + '</button>';
-            html += '<button type="button" id="capture-button-' + rowData.transaction_id + '" class="btn btn-info yuansferAction">' + window.yuansferLang.capture + '</button>';
-        }
-
-        // Void
         if (rowData.type === 'CAPTURE') {
             html += '<button type="button" id="refund-button-' + rowData.transaction_id + '" class="btn btn-secondary yuansferAction">' + window.yuansferLang.refund + '</button>';
         }

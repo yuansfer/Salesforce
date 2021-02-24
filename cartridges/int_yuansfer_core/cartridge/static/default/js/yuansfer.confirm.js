@@ -2,8 +2,8 @@
 /* eslint-disable no-alert */
 // v3
 var orderNumber = document.getElementById('yuansfer_order_number').value;
-var merchantNo = document.getElementById('yuansfer_merchant_number').value;
-var storeNo = document.getElementById('yuansfer_store_number').value;
+var merchantNo = document.getElementById('yuansfer_merchant_no').value;
+var storeNo = document.getElementById('yuansfer_store_no').value;
 var token = document.getElementById('yuansfer_token').value;
 var _redirectUrl = document.getElementById('yuansfer_home_show').value;
 
@@ -41,7 +41,7 @@ var _GetYuansferParams = function() {
     return params;
 }
 
-var _RedirectCallback = function() {
+var _RedirectCallback = function(_status) {
     var _n=1;
     var m=setInterval(function(){
         _n--;
@@ -55,43 +55,50 @@ var _RedirectCallback = function() {
 var _Polling =function(_queryUrl, _redirectUrl){
     var _num = 500;
     var params = _GetYuansferParams();
+    var queryUrl = document.getElementById('yuansfer_handle_confirm_url').value;
     var t=setInterval(function(){
-        _num--;
-        $.ajax({
-            url: document.getElementById('yuansfer_handle_confirm_url').value,
-            type: 'GET',
-            dataType:"json",
-            headers: {
-                'params':params
-            },
-        }).done(function (json) {
-                if(null != json){
-                    var _ret_code = json.ret_code;
-                    var _ret_msg = json.ret_msg;
-                    _status = json.result.status;
-                    if (_ret_code=="000100") {
-                        if  (_status=="fail") {
-                            clearInterval(t);
-                            document.getElementById("_message").innerText="支付失败";
-                        } else if (_status=="success") {
-                            clearInterval(t);
-                            document.getElementById("_message").innerText="支付成功";
-                            _RedirectCallback();                     
-                        } else {
-                            //continue
+        //二维码出现才进行请求轮询
+        // let qrcodePic = document.querySelector('div[id$="QRCode"]>img');
+        // if(qrcodePic && qrcodePic.src){
+            _num--;
+            $.ajax({
+                url: queryUrl,
+                type: 'POST',
+                contentType:'application/json; charset=utf-8',
+                data:params
+            }).done(function (json) {
+                    if(null != json){
+                        var _ret_code = json.ret_code;
+                        var _ret_msg = json.ret_msg;
+                        var _status = json.result.status;
+                        if (_ret_code=="000100") {
+                            if  (_status=="fail") {
+                                clearInterval(t);
+                                //document.getElementById("_message").innerText="支付失败";
+                                _RedirectCallback(_status);  
+                            } else if (_status=="success") {
+                                clearInterval(t);
+                                //document.getElementById("_message").innerText="支付成功";
+                                _RedirectCallback(_status);                     
+                            } else {
+                                //continue
+                            }
+                        } else if (_ret_code="000000") {
+                            //layer.msg(_ret_msg);
+                            console.log(_ret_msg);
                         }
-                    } else if (_ret_code="000000") {
-                        layer.msg(_ret_msg);
+                    }else{
+                        //layer.msg("query error");
+                        console.log('query error');
                     }
-                }else{
-                    layer.msg("query error");
-                }
-            }).fail(function(err){
-               layer.msg(err); 
-            }); 
-        if(_num==0){
-            clearInterval(t)
-        };
+                }).fail(function(err){
+                   //layer.msg(err); 
+                   console.log(err);
+                }); 
+            if(_num==0){
+                clearInterval(t)
+            };
+        // }
     },4000);
 
 };
@@ -118,5 +125,5 @@ function ready(fn){
     }
 }
 
-ready(_Polling(_queryUrl, _redirectUrl));
+ready(_Polling());
 

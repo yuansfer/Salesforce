@@ -1,14 +1,14 @@
 /* eslint-disable no-alert */
-/* globals cardElement, Stripe */
+/* globals cardElement, Yuansfer */
 // v1
 var $form = $('.payment-form');
-var stripe = Stripe(document.getElementById('stripePublicKey').value);
-var elements = stripe.elements();
+var yuansfer = Yuansfer(document.getElementById('yuansferPublicKey').value);
+var elements = yuansfer.elements();
 
 window.cardElement = window.cardElement || elements.create('card', { style: $form.data('element-style') });
 cardElement.mount('#card-element');
 
-var $cardHolderNameInput = $('#stripe-cardholder-name');
+var $cardHolderNameInput = $('#yuansfer-cardholder-name');
 
 function closeDialog() {
     var $dialogContainer = $('#dialog-container');
@@ -17,16 +17,15 @@ function closeDialog() {
     }
 }
 
-var cancelBtn = document.getElementById('stripeCancelBtn');
+var cancelBtn = document.getElementById('yuansferCancelBtn');
 cancelBtn.addEventListener('click', function () {
     closeDialog();
 });
 
-var $addCardBtn = $('#stripeApplyBtn');
+var $addCardBtn = $('#yuansferApplyBtn');
 $addCardBtn.on('click', function () {
-    // https://stripe.com/docs/payments/payment-methods/saving
 
-    stripe.createPaymentMethod('card', cardElement, {
+    yuansfer.createPaymentMethod('card', cardElement, {
         billing_details: {
             name: $cardHolderNameInput.val()
         }

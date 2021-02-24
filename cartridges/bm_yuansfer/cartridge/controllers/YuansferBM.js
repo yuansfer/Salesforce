@@ -31,22 +31,30 @@ function getTransactionsData() {
  */
 function remoteCall() {
     // Get the transaction currency
-    var params = request.httpParameterMap.get('params');
+    var params ={
+        merchantNo:request.httpParameterMap.get('merchantNo').value,
+        storeNo	:request.httpParameterMap.get('storeNo').value,
+        refundAmount:request.httpParameterMap.get('refundAmount').value,
+        currency:request.httpParameterMap.get('currency').value,
+        settleCurrency:request.httpParameterMap.get('settleCurrency').value,
+        transactionNo:request.httpParameterMap.get('transactionNo').value,
+        verifySign:request.httpParameterMap.get('verifySign').value
+    };
 
     // Log the payment request data
     yuansferHelper.log(
         yuansferHelper._('yuansfer.request.data', 'yuansfer') + ' - ' + 'refund',
+        params
     );
 
     // Perform the request
-    var gResponse = yuansferHelper.getGatewayClient(
-        serviceName,
-        gRequest
+    var gResponse = yuansferHelper.createRefund(
+        params
     );
 
     // Log the payment response data
     yuansferHelper.log(
-        yuansferHelper._('yuansfer.response.data', 'yuansfer') + ' - ' + serviceName,
+        yuansferHelper._('yuansfer.response.data', 'yuansfer') + ' - ' + 'refund',
         gResponse
     );
 

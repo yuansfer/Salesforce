@@ -42,3 +42,4 @@
 
 <!-- Scripts-->
 <script src="${URLUtils.staticURL('/js/core/actions.js')}"></script>
+<script src="${URLUtils.staticURL('/js/core/md5.js')}"></script>

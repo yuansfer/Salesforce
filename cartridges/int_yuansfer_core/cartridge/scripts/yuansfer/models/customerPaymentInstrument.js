@@ -4,35 +4,35 @@
 
 
 /**
- * An adapter for Stripe payment instrument data objects, to make then
+ * An adapter for Yuansfer payment instrument data objects, to make then
  * compatible (have the same properties) as dw.order.PaymentInstrumnent.
  *
- * @param {Object} stripePaymentInstrumentData - Payment instrument obejct
- *   received from Stripe service
+ * @param {Object} yuansferPaymentInstrumentData - Payment instrument obejct
+ *   received from Yuansfer service
  * @param {boolean} isDefault - Indicates whether this is the default payment
  *   instrument of the customer
  */
-function CustomerPaymentInstrument(stripePaymentInstrumentData, isDefault) {
-    const stripeCardData = stripePaymentInstrumentData.card;
-    const billingDetails = stripePaymentInstrumentData.billing_details;
+function CustomerPaymentInstrument(yuansferPaymentInstrumentData, isDefault) {
+    const yuansferCardData = yuansferPaymentInstrumentData.card;
+    const billingDetails = yuansferPaymentInstrumentData.billing_details;
 
-    const maskedCardNumber = '************' + stripeCardData.last4;
+    const maskedCardNumber = '************' + yuansferCardData.last4;
 
     var custom = Object.create(null, {
-        stripeId: {
-            value: stripePaymentInstrumentData.id,
+        yuansferId: {
+            value: yuansferPaymentInstrumentData.id,
             enumerable: true
         },
-        stripeObject: {
-            value: stripePaymentInstrumentData.object,
+        yuansferObject: {
+            value: yuansferPaymentInstrumentData.object,
             enumerable: true
         },
-        stripeType: {
-            value: stripePaymentInstrumentData.type,
+        yuansferType: {
+            value: yuansferPaymentInstrumentData.type,
             enumerable: true
         },
-        stripeCardBrand: {
-            value: stripeCardData.brand,
+        yuansferCardBrand: {
+            value: yuansferCardData.brand,
             enumerable: true
         },
         isDefault: {
@@ -43,7 +43,7 @@ function CustomerPaymentInstrument(stripePaymentInstrumentData, isDefault) {
 
     Object.defineProperties(this, {
         UUID: {
-            value: stripePaymentInstrumentData.id,
+            value: yuansferPaymentInstrumentData.id,
             enumerable: true
         },
         creditCardNumber: {
@@ -59,7 +59,7 @@ function CustomerPaymentInstrument(stripePaymentInstrumentData, isDefault) {
             enumerable: true
         },
         creditCardType: {
-            value: require('../helpers/cardsHelper').getCardTypeByBrand(stripeCardData.brand),
+            value: require('../helpers/cardsHelper').getCardTypeByBrand(yuansferCardData.brand),
             enumerable: true
         },
         creditCardHolder: {
@@ -67,15 +67,15 @@ function CustomerPaymentInstrument(stripePaymentInstrumentData, isDefault) {
             enumerable: true
         },
         creditCardExpirationYear: {
-            value: stripeCardData.exp_year,
+            value: yuansferCardData.exp_year,
             enumerable: true
         },
         creditCardExpirationMonth: {
-            value: stripeCardData.exp_month,
+            value: yuansferCardData.exp_month,
             enumerable: true
         },
         creditCardNumberLastDigits: {
-            value: stripeCardData.last4,
+            value: yuansferCardData.last4,
             enumerable: true
         },
         custom: {

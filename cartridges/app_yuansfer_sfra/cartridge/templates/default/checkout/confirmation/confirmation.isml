@@ -2,6 +2,7 @@
     <isscript>
         var assets = require('*/cartridge/scripts/assets.js');
         assets.addCss('/css/checkout/checkout.css');
+        assets.addJs('/js/md5.js');
         assets.addJs('/js/checkoutRegistration.js');
         assets.addJs('/js/yuansfer.confirm.js');
     </isscript>
@@ -26,6 +27,7 @@
                 <isset name="isAlipayHK" value="${false}" scope="page" />
                 <isset name="isGCash" value="${false}" scope="page" />
                 <isset name="isKakaoPay" value="${false}" scope="page" />
+                <isset name="isCreditCard" value="${false}" scope="page" />
                 <isloop items="${pdict.order.billing.payment.selectedPaymentInstruments}" var="payment">
 			        <isif condition="${payment.paymentMethod === 'YUANSFER_WECHATPAY'}">
 			            <isset name="isWeChatPay" value="${true}" scope="page" />
@@ -45,6 +47,9 @@
                         <iselseif condition="${payment.paymentMethod === 'YUANSFER_KAKAOPAY'}"/>
                             <isset name="isKakaoPay" value="${true}" scope="page" />
                             <isbreak/>    
+                        <iselseif condition="${payment.paymentMethod === 'YUANSFER_CREDITCARD'}"/>
+                            <isset name="isCreditCard" value="${true}" scope="page" />
+                            <isbreak/>  
 			        </isif>
 			    </isloop>
                 
@@ -60,8 +65,10 @@
                 	<isinclude template="checkout/kakaopayqrcode" />
                 <iselseif condition="${isGCash}"/>
                 	<isinclude template="checkout/gcashqrcode" />
+                <iselseif condition="${isCreditCard}"/>
+                	<isinclude template="checkout/creditcardqrcode" />
                 <iselse/>
-	                <isif condition="${pdict.order.orderStatus == dw.order.Order.ORDER_STATUS_CREATED}">
+                    <isif condition="${pdict.order.orderStatus == dw.order.Order.ORDER_STATUS_CREATED}">
 	                    <h2>${Resource.msg('yuansfer.confirmation.thankyou','yuansfer',null)}</h2>
 	                    <p class="order-thank-you-email-msg">${Resource.msg('yuansfer.confirmation.shippingnote', 'yuansfer', null)}</p>
 	                <iselse/>

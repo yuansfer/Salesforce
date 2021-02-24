@@ -60,7 +60,7 @@ function openModal(elt) {
 
     // Get the transaction data
     var tidExists = members[2] !== null && members[2] !== 'undefined';
-    var isValidTid = members[2].length > 0 && members[2].indexOf('act_') === 0;
+    var isValidTid = members[2].length > 0;
     if (tidExists && isValidTid) {
         // eslint-disable-next-line
         getTransactionData(members);
@@ -146,30 +146,55 @@ function showErrorMessage(selector) {
     );
 }
 
+function calculateVerifySign(contents,token) {
+    //1.对参数进行排序，然后用a=1&b=2..的形式拼接
+    var sortArray = [];
+
+    Object.keys(contents).sort().forEach(function (k) {
+      if (contents[k] || contents[k] === false) {
+        sortArray.push(k + '=' + contents[k]);
+      }
+    });
+
+    //对token进行md5，得到的结果追加到sortArray之后
+    sortArray.push(MD5(token));
+
+    var tempStr = sortArray.join('&');
+    // console.log('tempStr:', tempStr);
+
+    //对tempStr 再进行一次md5加密得到verifySign
+    var verifySign = MD5(tempStr);
+    // console.log('veirfySign:', verifySign)
+
+    return verifySign;
+}
+
 /**
  * Perform a transaction action.
  * @param {string} task The task to perform
  */
 function performAction(task) {
-    // Prepare the action URL
+
+    // set params
     var actionUrl = jQuery('[id="actionControllerUrl"]').val();
-
-    // Set the transaction id
-    var paymentId = jQuery('[id="' + task + '_payment_id"]').text();
-
-    // Set the currency
     var currency = jQuery('[id="' + task + '_currency"]').text();
-
-    // Set the transaction value field id
+    var transactionNo = jQuery('[id="' + task + '_transaction_id"]').text();
     var amount = jQuery('[id="' + task + '_value"]').val();
-
+    var merchantNo = document.getElementById('yuansfer_merchant_no').value;
+    var storeNo = document.getElementById('yuansfer_store_no').value;
+    var token = document.getElementById('yuansfer_token').value;
+    
     // Prepare the action data
     var data = {
-        pid: paymentId,
-        task: task,
-        amount: amount,
-        currency: currency
+        merchantNo: merchantNo,
+        storeNo: storeNo,
+        refundAmount: amount,
+        currency:currency,
+        settleCurrency:currency,
+        transactionNo:transactionNo,
     };
+    var verifySign = calculateVerifySign(data,token);
+    data['verifySign'] = verifySign;
 
     // Send the AJAX request
     jQuery.ajax({
@@ -177,9 +202,9 @@ function performAction(task) {
         url: actionUrl,
         data: data,
         success: function(res) {
-            var success = JSON.parse(res);
-            if (!success) {
-                showErrorMessage('yuansferErrorMessage');
+            var response = JSON.parse(res);
+            if (response.ret_code!="000100") {
+                showErrorMessage('yuansferErrorMessage',response.ret_msg);
             } else {
                 // Close the modal window
                 jQuery('.yuansferModal .modal-content .close').trigger('click');

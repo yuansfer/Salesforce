@@ -3,9 +3,6 @@
 /* API Includes */
 var LocalServiceRegistry = require('dw/svc/LocalServiceRegistry');
 
-/* Utility */
-var util = require('~/cartridge/scripts/helpers/CKOHelper');
-
 /**
  * Traverses a payload object to collect parameters and values to be passed
  * as key/value pairs either as query string or application/x-www-form-urlencoded

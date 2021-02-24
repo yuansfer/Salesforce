@@ -93,7 +93,7 @@ exports.isYuansferAPMPayment = isYuansferAPMPayment;
  * Returns a Yuansfer wallet wrapper for a given customer profile.
  *
  * @param {dw.customer.Customer} apiCustomer - SFCC API customer to return wrapper for.
- * @return {YuansferWallet} - StripeWallet instance
+ * @return {YuansferWallet} - YuansferWallet instance
  */
 exports.getYuansferWallet = function (apiCustomer) {
     return require('*/cartridge/scripts/yuansfer/models/yuansferWallet')(apiCustomer);

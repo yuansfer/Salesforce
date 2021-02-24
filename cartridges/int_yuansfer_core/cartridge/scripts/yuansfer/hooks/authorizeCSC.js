@@ -3,7 +3,7 @@
 
 'use strict';
 
-const Logger = require('dw/system/Logger').getLogger('Stripe', 'stripe');
+const Logger = require('dw/system/Logger').getLogger('Yuansfer', 'yuansfer');
 const Status = require('dw/system/Status');
 const Transaction = require('dw/system/Transaction');
 const Order = require('dw/order/Order');
@@ -33,9 +33,9 @@ exports.authorizeCreditCard = function (order, paymentInstrument, cvc) {
         var currentCurency = dw.util.Currency.getCurrency(amount.currencyCode);
         var multiplier = Math.pow(10, currentCurency.getDefaultFractionDigits());
         var orderAmount = Math.round(amount.value * multiplier);
-        const stripeChargeCapture = Site.getCurrent().getCustomPreferenceValue('stripeChargeCapture');
+        const yuansferChargeCapture = Site.getCurrent().getCustomPreferenceValue('yuansferChargeCapture');
 
-        const stripe = require('*/cartridge/scripts/stripe/services/stripeService');
+        const yuansfer = require('*/cartridge/scripts/yuansfer/services/yuansferService');
 
         var address = order.getBillingAddress();
         var billingDetails = {
@@ -59,7 +59,7 @@ exports.authorizeCreditCard = function (order, paymentInstrument, cvc) {
         }
 
 
-        const paymentMethod = stripe.paymentMethods.create({
+        const paymentMethod = yuansfer.paymentMethods.create({
             type: 'card',
             card: {
                 number: paymentInstrument.creditCardNumber,
@@ -70,7 +70,7 @@ exports.authorizeCreditCard = function (order, paymentInstrument, cvc) {
             billing_details: billingDetails
         });
 
-        const paymentIntent = stripe.paymentIntents.create({
+        const paymentIntent = yuansfer.paymentIntents.create({
             amount: orderAmount,
             currency: amount.currencyCode.toLowerCase(),
             payment_method: paymentMethod.id,
@@ -84,7 +84,7 @@ exports.authorizeCreditCard = function (order, paymentInstrument, cvc) {
         });
 
         if (paymentIntent.status === 'succeeded' ||
-         (paymentIntent.status === 'requires_capture' && !stripeChargeCapture)) {
+         (paymentIntent.status === 'requires_capture' && !yuansferChargeCapture)) {
             Transaction.wrap(function () {
                 if (paymentIntent.id) {
                     paymentInstrument.getPaymentTransaction().setTransactionID(paymentIntent.id); // eslint-disable-line

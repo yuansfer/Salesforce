@@ -11,6 +11,7 @@
                 <isset name="isAlipayHK" value="${false}" scope="page" />
                 <isset name="isGCash" value="${false}" scope="page" />
                 <isset name="isKakaoPay" value="${false}" scope="page" />
+                <isset name="isCreditCard" value="${false}" scope="page" />
                 <isloop items="${pdict.order.billing.payment.selectedPaymentInstruments}" var="payment">
 			        <isif condition="${payment.paymentMethod === 'YUANSFER_WECHATPAY'}">
 			            <isset name="isWeChatPay" value="${true}" scope="page" />
@@ -30,12 +31,15 @@
                         <iselseif condition="${payment.paymentMethod === 'YUANSFER_KAKAOPAY'}"/>
                             <isset name="isKakaoPay" value="${true}" scope="page" />
                             <isbreak/>    
+                        <iselseif condition="${payment.paymentMethod === 'YUANSFER_CREDITCARD'}"/>
+                            <isset name="isCreditCard" value="${true}" scope="page" />
+                            <isbreak/>  
 			        </isif>
 			    </isloop>
                 
                 <isif condition="${isWeChatPay}">
                 	<isinclude template="checkout/wechatpayqrcode" />
-                <iselseif condition="${isAlipayPay}"/>
+                <iselseif condition="${isAlipay}"/>
                 	<isinclude template="checkout/alipayqrcode" />
                 <iselseif condition="${isAlipayHK}"/>
                 	<isinclude template="checkout/alipayhkqrcode" />
@@ -45,6 +49,8 @@
                 	<isinclude template="checkout/kakaopayqrcode" />
                 <iselseif condition="${isGCash}"/>
                 	<isinclude template="checkout/gcashqrcode" />
+                <iselseif condition="${isCreditCard}"/>
+                	<isinclude template="checkout/creditcardqrcode" />
                 </isif>
             </div>
         </div>
@@ -77,3 +83,4 @@
         <isinclude template="checkout/orderTotalSummary" />
     </div>
 </div>
+

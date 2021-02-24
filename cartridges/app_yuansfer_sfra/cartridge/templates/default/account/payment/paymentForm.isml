@@ -1,15 +1,15 @@
 <isscript>
     var assets = require('*/cartridge/scripts/assets.js');
-    assets.addJs('/js/stripe.newcardform.js');
+    assets.addJs('/js/yuansfer.newcardform.js');
 </isscript>
 
 <form
-    action="${URLUtils.url('StripeWallet-AddNewCard', 'UUID', pdict.UUID)}"
+    action="${URLUtils.url('YuansferWallet-AddNewCard', 'UUID', pdict.UUID)}"
     class="payment-form"
     method="POST"
     name="payment-form" ${pdict.paymentForm.attributes}
     data-wallet-url="${URLUtils.https('PaymentInstruments-List')}"
-    data-element-style="${JSON.stringify(require('*/cartridge/scripts/stripe/helpers/stripeHelper').getStripeCardFormStyle())}">
+    data-element-style="${JSON.stringify(require('*/cartridge/scripts/yuansfer/helpers/yuansferHelper').getYuansferCardFormStyle())}">
 
     <!-- Name on Card -->
     <div class="form-group
@@ -29,8 +29,8 @@
     <!-- Card Number -->
     <div class="form-group
         <isif condition="${pdict.paymentForm.cardNumber.mandatory === true}">required</isif>">
-        <isif condition="${require('*/cartridge/scripts/stripe/helpers/stripeHelper').isCustomCardForm()}">
-            <isinclude template="stripe/checkout/billing/stripe_custom_cardform" />
+        <isif condition="${require('*/cartridge/scripts/yuansfer/helpers/yuansferHelper').isCustomCardForm()}">
+            <isinclude template="yuansfer/checkout/billing/yuansfer_custom_cardform" />
         <iselse>
             <label class="form-control-label" for="cardNumber">
 	            <isprint value="${pdict.paymentForm.cardNumber.label}" encoding="htmlcontent" />

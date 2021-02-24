@@ -15,30 +15,30 @@ const Order = require('dw/order/Order');
 * @returns {array} - array with result info
 */
 function Handle(args) {
-    const checkoutHelper = require('*/cartridge/scripts/stripe/helpers/checkoutHelper');
+    const checkoutHelper = require('*/cartridge/scripts/yuansfer/helpers/checkoutHelper');
     const paramsMap = request.httpParameterMap;
-    const cardType = require('*/cartridge/scripts/stripe/helpers/cardsHelper').getCardType();
+    const cardType = require('*/cartridge/scripts/yuansfer/helpers/cardsHelper').getCardType();
 
     var prUsed = false;
-    if (request.httpParameterMap.get('stripe_pr_used').value === 'true') {
+    if (request.httpParameterMap.get('yuansfer_pr_used').value === 'true') {
         prUsed = true;
     }
 
     const params = {
-        sourceId: paramsMap.stripe_source_id.stringValue,
-        cardNumber: paramsMap.stripe_card_number.stringValue,
-        cardHolder: paramsMap.stripe_card_holder.stringValue,
+        sourceId: paramsMap.yuansfer_source_id.stringValue,
+        cardNumber: paramsMap.yuansfer_card_number.stringValue,
+        cardHolder: paramsMap.yuansfer_card_holder.stringValue,
         cardType: cardType,
-        cardExpMonth: paramsMap.stripe_card_expiration_month.stringValue,
-        cardExpYear: paramsMap.stripe_card_expiration_year.stringValue,
-        saveCard: paramsMap.stripe_save_card.value,
+        cardExpMonth: paramsMap.yuansfer_card_expiration_month.stringValue,
+        cardExpYear: paramsMap.yuansfer_card_expiration_year.stringValue,
+        saveCard: paramsMap.yuansfer_save_card.value,
         prUsed: prUsed,
-        saveGuessCard: paramsMap.stripe_save_guess_card.value
+        saveGuessCard: paramsMap.yuansfer_save_guess_card.value
     };
 
     try {
         Transaction.begin();
-        checkoutHelper.createStripePaymentInstrument(args.Basket, PaymentInstrument.METHOD_CREDIT_CARD, params);
+        checkoutHelper.createYuansferPaymentInstrument(args.Basket, PaymentInstrument.METHOD_CREDIT_CARD, params);
         Transaction.commit();
         return {
             success: true
@@ -65,7 +65,7 @@ function Authorize(args) {
     const orderNo = args.OrderNo;
     const paymentInstrument = args.PaymentInstrument;
     const paymentIntentId = paymentInstrument.paymentTransaction.getTransactionID();
-    const stripeChargeCapture = Site.getCurrent().getCustomPreferenceValue('stripeChargeCapture');
+    const yuansferChargeCapture = Site.getCurrent().getCustomPreferenceValue('yuansferChargeCapture');
 
     if (!paymentIntentId) {
         responsePayload = {
@@ -73,17 +73,17 @@ function Authorize(args) {
             error: true
         };
     } else {
-        const stripeService = require('*/cartridge/scripts/stripe/services/stripeService');
+        const yuansferService = require('*/cartridge/scripts/yuansfer/services/yuansferService');
 
         try {
-            const paymentIntent = stripeService.paymentIntents.update(paymentIntentId, {
+            const paymentIntent = yuansferService.paymentIntents.update(paymentIntentId, {
                 metadata: {
                     order_id: orderNo,
                     site_id: Site.getCurrent().getID()
                 }
             });
 
-            if ((!stripeChargeCapture && paymentIntent.status !== 'requires_capture') || (stripeChargeCapture && paymentIntent.status !== 'succeeded')) {
+            if ((!yuansferChargeCapture && paymentIntent.status !== 'requires_capture') || (yuansferChargeCapture && paymentIntent.status !== 'succeeded')) {
                 throw new Error('Payment was not successful, payment intent status is ' + paymentIntent.status);
             }
 
@@ -99,7 +99,7 @@ function Authorize(args) {
 
             const paymentProcessor = args.PaymentProcessor || PaymentMgr.getPaymentMethod(paymentInstrument.getPaymentMethod()).getPaymentProcessor();
             Transaction.wrap(function () {
-                paymentInstrument.custom.stripeChargeID = charge.id;
+                paymentInstrument.custom.yuansferChargeID = charge.id;
 
                 if (charge.balance_transaction) {
                     paymentInstrument.paymentTransaction.transactionID = charge.balance_transaction;

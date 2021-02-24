@@ -120,61 +120,17 @@ exports.removeYuansferPaymentInstruments = function (lineItemCtnr) {
 
 exports.createYuansferPaymentInstrument = function (lineItemCtnr, paymentMethodId, params) {
     exports.removeYuansferPaymentInstruments(lineItemCtnr);
+    var PaymentTransaction = require('dw/order/PaymentTransaction');
 
     const paymentInstrument = lineItemCtnr.createPaymentInstrument(paymentMethodId, this.getNonGiftCertificateAmount(lineItemCtnr));
 
     const yuansferService = require('*/cartridge/scripts/yuansfer/services/yuansferService');
 
-    if (params) {
-
-        if ('cardHolder' in params) {
-            paymentInstrument.creditCardHolder = params.cardHolder;
-        }
-
-        if ('cardNumber' in params) {
-            paymentInstrument.creditCardNumber = params.cardNumber;
-        }
-
-        if ('cardType' in params) {
-            paymentInstrument.creditCardType = params.cardType;
-        }
-
-        if ('cardExpMonth' in params) {
-            paymentInstrument.creditCardExpirationMonth = params.cardExpMonth;
-        }
-
-        if ('cardExpYear' in params) {
-            paymentInstrument.creditCardExpirationYear = params.cardExpYear;
-        }
-
-        if ('yuansferWeChatPayQRCodeURL' in params) {
-            paymentInstrument.custom.yuansferWeChatPayQRCodeURL = params.yuansferWeChatPayQRCodeURL;
-        }
-
-        if ('yuansferAlipayQRCodeURL' in params) {
-            paymentInstrument.custom.yuansferAlipayQRCodeURL = params.yuansferAlipayQRCodeURL;
-        }
-
-        if ('yuansferAlipayHKQRCodeURL' in params) {
-            paymentInstrument.custom.yuansferAlipayHKQRCodeURL = params.yuansferAlipayHKQRCodeURL;
-        }
-
-        if ('yuansferDanaQRCodeURL' in params) {
-            paymentInstrument.custom.yuansferDanaQRCodeURL = params.yuansferDanaQRCodeURL;
-        }
-
-        if ('yuansferGCashQRCodeURL' in params) {
-            paymentInstrument.custom.yuansferGCashQRCodeURL = params.yuansferGCashQRCodeURL;
-        }
-
-        if ('yuansferKakaoPayQRCodeURL' in params) {
-            paymentInstrument.custom.yuansferKakaoPayQRCodeURL = params.yuansferKakaoPayQRCodeURL;
-        }
-    }
-
     if (session.privacy.yuansferOrderNumber) {
         const paymentTransaction = paymentInstrument.paymentTransaction;
         paymentTransaction.custom.yuansferOrderNumber = session.privacy.yuansferOrderNumber;
+        paymentTransaction.custom.yuansferTransactionOpened = true;
+        paymentInstrument.paymentTransaction.setType(PaymentTransaction.TYPE_CAPTURE);
     }
 
     if (customer.authenticated) {
@@ -360,57 +316,6 @@ exports.isAPMOrder = function (order) {
     }
 
     return false;
-};
-
-exports.refundCharge = function (order) {
-    const crypto = require('crypto');
-    var yuansferHelper=require('*/cartridge/scripts/yuansfer/helpers/yuansferHelper');
-
-    var yuansferTransactionNo = exports.getTransactionNo(order.yuansferOrderNumber);
-    var yuansferReference = exports.getReference(order.yuansferOrderNumber);
-    var yuansferMerchantNo = yuansferHelper.getYuansferMerchantNo();
-    var yuansferStoreNo = yuansferHelper.getYuansferStoreNo();
-    var yuansferToken = yuansferHelper.getYuansferToken();
-    var params = {
-        merchantNo:yuansferMerchantNo,
-        storeNo: yuansferStoreNo
-    };
-    var verifySign;
-    if(yuansferTransactionNo){
-        params["transactionNo"] = yuansferTransactionNo;
-    }else if(yuansferReference){
-        params["reference"] = yuansferTransactionNo;
-    }
-    if(params.transactionNo||params.reference){
-        var sortArray = [];
-        Object.keys(contents).sort().forEach(function (k) {
-            if (contents[k] || contents[k] === false) {
-                sortArray.push(k + '=' + contents[k]);
-            }
-        });
-
-        sortArray.push(crypto.createHash('md5').update(yuansferToken).digest("hex"));
-
-        var tempStr = sortArray.join('&');
-        verifySign = crypto.createHash('md5').update(tempStr).digest("hex");
-        params["verifySign"] = verifySign;
-    }
-    if (params.verifySign) {
-        const yuansferService = require('*/cartridge/scripts/yuansfer/services/yuansferService');
-
-        try {
-            yuansferService.refunds.create(params);
-        } catch (e) {
-            let errorMessage = 'Failed to refund charge ' + chargeId;
-            errorMessage += '\n Original error was: ' + e.message;
-            const Logger = require('dw/system/Logger');
-            Logger.error(errorMessage);
-            const Transaction = require('dw/system/Transaction');
-            Transaction.wrap(function () {
-                order.addNote('Yuansfer refund failed', errorMessage);
-            });
-        }
-    }
 };
 
 exports.getYuansferOrderDetails = function (basket) {
@@ -621,6 +526,19 @@ exports.getAlipayHKQRCodeURL = function (orderNumber) {
     var order = OrderMgr.getOrder(orderNumber);
 
     return !empty(order) ? order.custom.yuansferAlipayHKQRCodeURL : '';
+};
+
+/**
+ * Get Credit Card QR Code URL by Order Number
+ * @param {Integer} orderNumber to get QR Code URL
+ * @returns {string} redit Card QR Code URL
+ */
+exports.getCreditCardQRCodeURL = function (orderNumber) {
+    const OrderMgr = require('dw/order/OrderMgr');
+
+    var order = OrderMgr.getOrder(orderNumber);
+
+    return !empty(order) ? order.custom.yuansferCreditCardQRCodeURL : '';
 };
 
 /**

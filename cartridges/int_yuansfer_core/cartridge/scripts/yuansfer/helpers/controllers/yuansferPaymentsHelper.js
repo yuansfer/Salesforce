@@ -3,6 +3,36 @@
 
 'use strict';
 
+function decodeFormParams(params) {
+    var pairs = params.split('&'),
+        result = {};
+  
+    for (var i = 0; i < pairs.length; i++) {
+      var pair = pairs[i].split('='),
+          key = decodeURIComponent(pair[0]),
+          value = decodeURIComponent(pair[1]),
+          isArray = /\[\]$/.test(key),
+          dictMatch = key.match(/^(.+)\[([^\]]+)\]$/);
+  
+      if (dictMatch) {
+        key = dictMatch[1];
+        var subkey = dictMatch[2];
+  
+        result[key] = result[key] || {};
+        result[key][subkey] = value;
+      } else if (isArray) {
+        key = key.substring(0, key.length-2);
+        result[key] = result[key] || [];
+        result[key].push(value);
+      } else {
+        result[key] = value;
+      }
+    }
+  
+    return result;
+}
+exports.DecodeFormParams = decodeFormParams;
+
 /**
  * Created a response payload for beforePaymentAuthorization based on the status
  * of a given payment intent.
@@ -13,9 +43,8 @@
 function searchTransaction(params) {
     var responsePayload;
     const yuansferService = require('*/cartridge/scripts/yuansfer/services/yuansferService');
-
     if(params){
-        responsePayload = yuansferService.tranQuery(params);
+        responsePayload = yuansferService.tranQuery.create(params);
     }
 
     return responsePayload;

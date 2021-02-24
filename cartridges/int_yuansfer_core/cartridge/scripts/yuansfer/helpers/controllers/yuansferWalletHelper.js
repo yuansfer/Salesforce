@@ -9,16 +9,16 @@
 * @returns {array} - array with result info
 */
 function AddNewCard() {
-    const stripePaymentMethodId = request.httpParameterMap.payment_method_id.stringValue;
-    const stripeHelper = require('*/cartridge/scripts/stripe/helpers/stripeHelper');
-    const wallet = stripeHelper.getStripeWallet(customer);
+    const yuansferPaymentMethodId = request.httpParameterMap.payment_method_id.stringValue;
+    const yuansferHelper = require('*/cartridge/scripts/yuansfer/helpers/yuansferHelper');
+    const wallet = yuansferHelper.getYuansferWallet(customer);
 
     var responsePayload = {
         success: true
     };
 
     try {
-        wallet.attachPaymentInstrument(stripePaymentMethodId);
+        wallet.attachPaymentInstrument(yuansferPaymentMethodId);
     } catch (e) {
         responsePayload = {
             success: false,
@@ -36,12 +36,12 @@ module.exports.AddNewCard.public = true;
 * Make card default
 */
 function MakeDefault() {
-    const stripeId = request.httpParameterMap.stripe_id.stringValue;
-    const stripeHelper = require('*/cartridge/scripts/stripe/helpers/stripeHelper');
-    const wallet = stripeHelper.getStripeWallet(customer);
+    const yuansferId = request.httpParameterMap.yuansfer_id.stringValue;
+    const yuansferHelper = require('*/cartridge/scripts/yuansfer/helpers/yuansferHelper');
+    const wallet = yuansferHelper.getYuansferWallet(customer);
 
     try {
-        wallet.makeDefault(stripeId);
+        wallet.makeDefault(yuansferId);
     } catch (e) {
         require('dw/system/Logger').error('Failed to make card default, original error was: {0}', e.message);
     }

@@ -20,16 +20,16 @@ server.post('BeforePaymentAuthorization',server.middleware.https, csrfProtection
 /**
  * Entry point for handling transaction search.
  */
-server.get('HandleConfirm',function (req, res, next) {
-    
-    var params = JSON.parse( req.httpHeaders.params);
+server.post('HandleConfirm',function (req, res, next) {
+    var bodyParams = req.httpParameterMap.requestBodyAsString;
+    var params = yuansferPaymentsHelper.DecodeFormParams(bodyParams);
     var responsePayload = yuansferPaymentsHelper.SearchTransaction(params);
     if(responsePayload.ret_code == "000100"){
         if(responsePayload.result.status == "success"){
             var placeOrderParams = params;
-            params['transactionNo'] = responsePayload.result.transactionNo;
+            placeOrderParams['transactionNo'] = responsePayload.result.transactionNo;
             const confirmPaymentHelper = require('*/cartridge/scripts/yuansfer/helpers/confirmPaymentHelper');
-            var success = confirmPaymentHelper.processIncomingNotification(params);
+            var success = confirmPaymentHelper.processIncomingNotification(placeOrderParams);
         }
     }
     res.json(responsePayload);
