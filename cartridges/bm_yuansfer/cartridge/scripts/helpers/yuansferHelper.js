@@ -334,23 +334,23 @@ var YuansferHelper = {
 
         // Get the payment processor id
         var paymentProcessorId = order.paymentInstrument.paymentTransaction.paymentProcessor.ID;
+        var paymentProcessor = order.paymentInstrument.paymentTransaction.paymentProcessor;
         // Create the refunded transaction
+        var paymentInstrument;
+        var amount = new Money(params.amount,params.currency);
         Transaction.wrap(function() {
             try{
-                var paymentInstrument = order.addNote(paymentProcessorId,'233');
+                paymentInstrument = order.createPaymentInstrument(paymentProcessorId,amount);
             } catch(e){
                 var a = e;
-                alert(e);
             }
             
 
             paymentInstrument.paymentTransaction.transactionID = params.orderNumber;
-            paymentInstrument.paymentTransaction.paymentProcessor = paymentProcessorId;
+            paymentInstrument.paymentTransaction.paymentProcessor = paymentProcessor;
             paymentInstrument.paymentTransaction.custom.yuansferOrderNumber = params.orderNumber;
             paymentInstrument.paymentTransaction.custom.yuansferTransactionOpened = false;
             paymentInstrument.paymentTransaction.setType(PaymentTransaction.TYPE_CREDIT);
-
-            this.setPaymentStatus(order);
 
         });
     },
