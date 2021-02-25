@@ -218,6 +218,32 @@ function processSecurePayResult(result) {
     }
 }
 
+function notEmailFormat(email){
+     /**
+       * @return {boolean}
+      */
+    const reg = /^[\w.%+-]+@[\w.-]+\.[\w]{2,6}$/;
+    return !reg.test(email)
+}
+
+function checkFieldNotPass(seletor){
+    //check fields
+    var flag = false;
+    var contactInfos = $(seletor);
+    for(let info of contactInfos){ 
+        if(!info.value){
+            flag = true;
+            break
+        }else if(info.name && info.name.indexOf('email') !== -1){
+            flag = notEmailFormat(info.value);
+            if(flag){
+                break
+            }
+        }
+    }
+    return flag
+}
+
 function placeHolderOption(text) {
     const optionElement = document.createElement('option');
     optionElement.selected = 'selected';
@@ -229,6 +255,10 @@ function placeHolderOption(text) {
   }
 
 document.querySelector('button.submit-payment').addEventListener('click', function (event) {
+    
+    if(checkFieldNotPass('#dwfrm_billing .contact-info-block input')){
+        return false
+    }
 
     $.spinner().start();
     
