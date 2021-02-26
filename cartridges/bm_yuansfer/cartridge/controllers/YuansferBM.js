@@ -32,14 +32,14 @@ function getTransactionsData() {
 function remoteCall() {
     // Get the transaction currency
     var orderNumber = request.httpParameterMap.get('orderNumber').value;
-    var params ={
-        merchantNo:request.httpParameterMap.get('merchantNo').value,
-        storeNo	:request.httpParameterMap.get('storeNo').value,
-        refundAmount:request.httpParameterMap.get('refundAmount').value,
-        currency:request.httpParameterMap.get('currency').value,
-        settleCurrency:request.httpParameterMap.get('settleCurrency').value,
-        transactionNo:request.httpParameterMap.get('transactionNo').value,
-        verifySign:request.httpParameterMap.get('verifySign').value
+    var params = {
+        merchantNo: request.httpParameterMap.get('merchantNo').value,
+        storeNo: request.httpParameterMap.get('storeNo').value,
+        refundAmount: request.httpParameterMap.get('refundAmount').value,
+        currency: request.httpParameterMap.get('currency').value,
+        settleCurrency: request.httpParameterMap.get('settleCurrency').value,
+        transactionNo: request.httpParameterMap.get('transactionNo').value,
+        verifySign: request.httpParameterMap.get('verifySign').value
     };
 
     // Log the payment request data
@@ -49,24 +49,21 @@ function remoteCall() {
     );
 
     // Perform the request
-    var gResponse = yuansferHelper.createRefund(
-        params
-    );
-    if(gResponse.ret_code=='000100'){
-        var amount = gResponse.result.refundAmount;
-        yuansferHelper.paymentRefunded({
-            orderNumber:orderNumber,
-            amount:amount,
-            currency:params.currency
-        })
-    }
-    
+    var gResponse = yuansferHelper.createRefund(params);
 
     // Log the payment response data
     yuansferHelper.log(
         yuansferHelper._('yuansfer.response.data', 'yuansfer') + ' - ' + 'refund',
         gResponse
     );
+    if (gResponse.ret_code == '000100') {
+        var amount = gResponse.result.refundAmount;
+        yuansferHelper.paymentRefunded({
+            orderNumber: orderNumber,
+            amount: amount,
+            currency: params.currency
+        });
+    }
 
     // Return the response
     // eslint-disable-next-line

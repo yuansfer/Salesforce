@@ -3,7 +3,7 @@
 /**
  * jQuery Ajax helpers on DOM ready.
  */
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Load the translation strings
     // eslint-disable-next-line
     loadTranslations();
@@ -67,13 +67,13 @@ function getTransactions(callBackFn) {
     jQuery.ajax({
         type: 'POST',
         url: controllerUrl,
-        success: function(data) {
+        success: function (data) {
             callBackFn(data);
         },
-        error: function(request, status, error) {
+        error: function (request, status, error) {
             // eslint-disable-next-line no-console
             console.log(error);
-        },
+        }
     });
 }
 
@@ -96,11 +96,11 @@ function initTable(tableData) {
         paginationSize: 50,
         columns: getTableColumns(), // eslint-disable-line
         langs: getTableStrings(), // eslint-disable-line
-        tableBuilt: function() {
+        tableBuilt: function () {
             // Set the pagination controls
             // eslint-disable-next-line
             setPagination(this);
-        },
+        }
     });
 }
 
@@ -124,7 +124,7 @@ function getTableStrings() {
                 type: window.yuansferLang.type,
                 opened: window.yuansferLang.opened,
                 processor: window.yuansferLang.processor,
-                actions: window.yuansferLang.actions,
+                actions: window.yuansferLang.actions
             },
             pagination: {
                 first: window.yuansferLang.first,
@@ -134,9 +134,9 @@ function getTableStrings() {
                 prev: window.yuansferLang.prev,
                 prev_title: window.yuansferLang.prevTitle,
                 next: window.yuansferLang.next,
-                next_title: window.yuansferLang.nextTitle,
-            },
-        },
+                next_title: window.yuansferLang.nextTitle
+            }
+        }
     };
 }
 
@@ -155,7 +155,7 @@ function getTableLocale() {
  */
 function setPagination(table) {
     // Add the pager event
-    jQuery('.transactions-table-controls .transactions-table-pager').change(function() {
+    jQuery('.transactions-table-controls .transactions-table-pager').change(function () {
         var selectedVal = jQuery(this).val();
         jQuery(this).val(selectedVal);
         table.setPageSize(selectedVal);
@@ -176,10 +176,10 @@ function getTableColumns() {
             title: 'Amount',
             field: 'amount',
             headerFilter: 'input',
-            formatter: function(cell, formatterParams, onRendered) {
+            formatter: function (cell, formatterParams, onRendered) {
                 var rowData = cell.getRow().getData();
                 return cell.getValue() + ' ' + rowData.currency;
-            },
+            }
         },
         { title: 'Currency', field: 'currency', visible: false },
         { title: 'Date', field: 'creation_date', headerFilter: 'input' },
@@ -192,11 +192,11 @@ function getTableColumns() {
             width: 230,
             headerSort: false,
             align: 'center',
-            formatter: function(cell, formatterParams, onRendered) {
+            formatter: function (cell, formatterParams, onRendered) {
                 // eslint-disable-next-line
                 return getButtonsHtml(cell);
-            },
-        },
+            }
+        }
     ];
 }
 
@@ -213,7 +213,7 @@ function getButtonsHtml(cell) {
     var html = '';
 
     // Build the action buttons
-    if (JSON.parse(rowData.opened) && rowData.type !== 'CREDIT' && rowData.transaction_id) {
+    if (JSON.parse(rowData.opened) && rowData.type !== 'CREDIT' && rowData.transaction_id && rowData.refundable_amount > 0) {
         if (rowData.type === 'CAPTURE') {
             html += '<button type="button" id="refund-button-' + rowData.transaction_id + '" class="btn btn-secondary yuansferAction">' + window.yuansferLang.refund + '</button>';
         }

@@ -79,4 +79,13 @@
         </currencies>
     </payment-method>
 
+    <payment-method method-id="YUANSFER_PAYPAL">
+        <name xml:lang="x-default">Paypal</name>
+        <enabled-flag>true</enabled-flag>
+        <processor-id>YUANSFER_APM</processor-id>
+        <currencies>
+            <currency>USD</currency>
+        </currencies>
+    </payment-method>
+
 </payment-settings>

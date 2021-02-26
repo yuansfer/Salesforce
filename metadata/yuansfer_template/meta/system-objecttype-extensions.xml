@@ -77,8 +77,15 @@
                 <externally-managed-flag>false</externally-managed-flag>
                 <min-length>0</min-length>
             </attribute-definition>
-             <attribute-definition attribute-id="yuansferCreditCardQRCodeURL">
+            <attribute-definition attribute-id="yuansferCreditCardQRCodeURL">
                 <display-name xml:lang="x-default">Yuansfer Credit Card QR Code URL</display-name>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
+            <attribute-definition attribute-id="yuansferPaypalQRCodeURL">
+                <display-name xml:lang="x-default">Yuansfer Paypal QR Code URL</display-name>
                 <type>string</type>
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
@@ -245,6 +252,13 @@
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
             </attribute-definition>
+            <attribute-definition attribute-id="yuansferPaypalQRCodeURL">
+                <display-name xml:lang="x-default">Yuansfer Paypal QR Code URL</display-name>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
         </custom-attribute-definitions>
     </type-extension>
 
@@ -313,6 +327,13 @@
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
             </attribute-definition>
+            <attribute-definition attribute-id="yuansferPaypalQRCodeURL">
+                <display-name xml:lang="x-default">Yuansfer Paypal QR Code URL</display-name>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
         </custom-attribute-definitions>
         <group-definitions>
             <attribute-group group-id="Yuansfer Payment">
@@ -326,6 +347,7 @@
                 <attribute attribute-id="yuansferGCashQRCodeURL"/>
                 <attribute attribute-id="yuansferAlipayHKQRCodeURL"/>
                 <attribute attribute-id="yuansferCreditCardQRCodeURL"/>
+                <attribute attribute-id="yuansferPaypalQRCodeURL"/>
             </attribute-group>
         </group-definitions>
     </type-extension>

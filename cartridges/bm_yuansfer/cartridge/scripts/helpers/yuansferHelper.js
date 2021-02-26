@@ -177,7 +177,7 @@ var YuansferHelper = {
      */
     isYuansferItem: function(item) {
         return item.length > 0 && (item.indexOf('YUANSFER_WECHATPAY') >= 0 || item.indexOf('YUANSFER_ALIPAY') >= 0|| item.indexOf('YUANSFER_KAKAOPAY') >= 0 || item.indexOf('YUANSFER_GCASH') >= 0
-        ||item.indexOf('YUANSFER_ALIPAYHK') >= 0|| item.indexOf('YUANSFER_DANA') >= 0||item.indexOf('YUANSFER_CREDITCARD') >= 0 || item.indexOf('YUANSFER_APM') >= 0);
+        ||item.indexOf('YUANSFER_ALIPAYHK') >= 0|| item.indexOf('YUANSFER_DANA') >= 0||item.indexOf('YUANSFER_CREDITCARD') >= 0 || item.indexOf('YUANSFER_APM') >= 0 || item.indexOf('YUANSFER_PAYPAL') >= 0);
     },
 
     /**

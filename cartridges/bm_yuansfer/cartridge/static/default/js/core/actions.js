@@ -3,7 +3,7 @@
 /**
  * jQuery Ajax helpers on DOM ready.
  */
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Initialize the button events
     // eslint-disable-next-line
     initButtons();
@@ -14,14 +14,14 @@ document.addEventListener('DOMContentLoaded', function() {
  */
 function initButtons() {
     // Close the modal window
-    jQuery('.yuansferModal .modal-content .close').click(function(e) {
+    jQuery('.yuansferModal .modal-content .close').click(function (e) {
         jQuery('.yuansferModal .modal-content input').val('');
         jQuery('.yuansferModal .modal-content span').not('.close, .label').empty();
         jQuery('.yuansferModal').hide();
     });
 
     // Define the transaction buttons click events
-    document.addEventListener('click', function(e) {
+    document.addEventListener('click', function (e) {
         // Prevent double click
         if (typeof e.target.className === 'string' && e.target.className.indexOf('yuansferAction') !== -1) {
             // Ignore double cliks
@@ -36,7 +36,7 @@ function initButtons() {
     }, true);
 
     // Submit the action request
-    jQuery('.yuansferModal .modal-content .submit').click(function() {
+    jQuery('.yuansferModal .modal-content .submit').click(function () {
         // Prepare the origin element id members
         var elt = jQuery(this).closest('.modal-content').find('input');
         var members = elt.attr('id').split('_');
@@ -92,7 +92,7 @@ function getTransactionData(members) {
         type: 'POST',
         url: controllerUrl,
         data: { tid: transactionId },
-        success: function(data) {
+        success: function (data) {
             // Get the data
             var transaction = JSON.parse(data)[0];
 
@@ -123,10 +123,10 @@ function getTransactionData(members) {
             // Show the modal window
             jQuery(modalId).show();
         },
-        error: function(request, status, error) {
+        error: function (request, status, error) {
             // eslint-disable-next-line no-console
             console.log(error);
-        },
+        }
     });
 }
 
@@ -138,35 +138,51 @@ function showErrorMessage(selector) {
     // Show the error message
     jQuery('.' + selector).show(
         'fast',
-        function() {
-            setTimeout(function() {
+        function () {
+            setTimeout(function () {
                 jQuery('.' + selector).hide();
             }, 7000);
         }
     );
 }
 
-function calculateVerifySign(contents,token) {
-    //1.对参数进行排序，然后用a=1&b=2..的形式拼接
+function calculateVerifySign(contents, token) {
+    // 1.对参数进行排序，然后用a=1&b=2..的形式拼接
     var sortArray = [];
 
     Object.keys(contents).sort().forEach(function (k) {
-      if (contents[k] || contents[k] === false) {
-        sortArray.push(k + '=' + contents[k]);
-      }
+        if (contents[k] || contents[k] === false) {
+            sortArray.push(k + '=' + contents[k]);
+        }
     });
 
-    //对token进行md5，得到的结果追加到sortArray之后
+    // 对token进行md5，得到的结果追加到sortArray之后
     sortArray.push(MD5(token));
 
     var tempStr = sortArray.join('&');
     // console.log('tempStr:', tempStr);
 
-    //对tempStr 再进行一次md5加密得到verifySign
+    // 对tempStr 再进行一次md5加密得到verifySign
     var verifySign = MD5(tempStr);
     // console.log('veirfySign:', verifySign)
 
     return verifySign;
+}
+
+function performActionAjax(url, params) {
+    return jQuery.ajax({
+        type: 'POST',
+        url: url,
+        data: params
+    });
+}
+function isJson(str) {
+    try {
+        JSON.parse(str);
+    } catch (e) {
+        return false;
+    }
+    return true;
 }
 
 /**
@@ -174,7 +190,6 @@ function calculateVerifySign(contents,token) {
  * @param {string} task The task to perform
  */
 function performAction(task) {
-
     // set params
     var actionUrl = jQuery('[id="actionControllerUrl"]').val();
     var currency = jQuery('[id="' + task + '_currency"]').text();
@@ -189,23 +204,22 @@ function performAction(task) {
         merchantNo: merchantNo,
         storeNo: storeNo,
         refundAmount: amount,
-        currency:currency,
-        settleCurrency:currency,
-        transactionNo:transactionNo,
+        currency: currency,
+        settleCurrency: currency,
+        transactionNo: transactionNo
     };
-    var verifySign = calculateVerifySign(data,token);
-    data['verifySign'] = verifySign;
-    data['orderNumber'] = orderNumber;
+    var verifySign = calculateVerifySign(data, token);
+    data.verifySign = verifySign;
+    data.orderNumber = orderNumber;
 
     // Send the AJAX request
-    jQuery.ajax({
-        type: 'POST',
-        url: actionUrl,
-        data: data,
-        success: function(res) {
+    var promise = performActionAjax(actionUrl, data);
+    promise.done(function (res) {
+        console.log(res);
+        if (isJson(res)) {
             var response = JSON.parse(res);
-            if (response.ret_code!="000100") {
-                showErrorMessage('yuansferErrorMessage',response.ret_msg);
+            if (response.ret_code != '000100') {
+                showErrorMessage('yuansferErrorMessage', response.ret_msg);
             } else {
                 // Close the modal window
                 jQuery('.yuansferModal .modal-content .close').trigger('click');
@@ -214,11 +228,9 @@ function performAction(task) {
                 // eslint-disable-next-line
                 getTransactions(reloadTable);
             }
-        },
-        error: function(request, status, error) {
-            // eslint-disable-next-line no-console
-            console.log(error);
-        },
+        }
+    }).fail(function (request, status, error) {
+        console.log(error);
     });
 }
 
@@ -242,8 +254,8 @@ function showSuccessMessage() {
     // Show the success message
     jQuery('.yuansferSuccessMessage').show(
         'fast',
-        function() {
-            setTimeout(function() {
+        function () {
+            setTimeout(function () {
                 jQuery('.yuansferSuccessMessage').hide('fast');
             }, 7000);
         }

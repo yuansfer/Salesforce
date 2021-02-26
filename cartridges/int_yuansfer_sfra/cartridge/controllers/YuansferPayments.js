@@ -6,6 +6,7 @@ var server = require('server');
 
 var yuansferPaymentsHelper = require('*/cartridge/scripts/yuansfer/helpers/controllers/yuansferPaymentsHelper');
 var csrfProtection = require('*/cartridge/scripts/middleware/csrf');
+const URLUtils = require('dw/web/URLUtils');
 /**
  * Entry point for handling payment intent creation and confirmation AJAX calls.
  */
@@ -14,7 +15,13 @@ server.post('BeforePaymentAuthorization',server.middleware.https, csrfProtection
     var params = JSON.parse( req.httpHeaders.params);
     var responsePayload = yuansferPaymentsHelper.BeforePaymentAuthorization(params);
     res.json(responsePayload);
-    next();
+    if(responsePayload.error){
+        const redirectUrl = URLUtils.url('Checkout-Begin', 'stage', 'payment');
+        res.redirect(redirectUrl);
+    }else{
+        next();
+    }
+    
 });
 
 /**
