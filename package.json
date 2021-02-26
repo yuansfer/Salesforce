@@ -36,7 +36,8 @@
     "uploadCartridge": "sgmf-scripts --uploadCartridge app_storefront_base && sgmf-scripts --uploadCartridge modules && sgmf-scripts --uploadCartridge bm_app_storefront_base",
     "watch": "sgmf-scripts --watch",
     "watch:static": "sgmf-scripts --watch static",
-    "release": "node bin/Makefile release --"
+    "release": "node bin/Makefile release --",
+    "test:sfra": "mocha ./tests/sfra-integration-test"
   },
   "repository": {
     "type": "git",
@@ -108,7 +109,8 @@
     "cleave.js": "^1.5.3",
     "flag-icon-css": "^2.9.0",
     "font-awesome": "^4.7.0",
-    "jquery": "^3.5.1"
+    "jquery": "^3.5.1",
+    "superagent": "^6.1.0"
   },
   "browserslist": [
     "last 2 versions",

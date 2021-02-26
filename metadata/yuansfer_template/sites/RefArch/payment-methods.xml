@@ -71,7 +71,7 @@
     </payment-method>
 
     <payment-method method-id="YUANSFER_CREDITCARD">
-        <name xml:lang="x-default">Yuansfer CreditCard</name>
+        <name xml:lang="x-default">Yuansfer Credit Card</name>
         <enabled-flag>true</enabled-flag>
         <processor-id>YUANSFER_APM</processor-id>
         <currencies>

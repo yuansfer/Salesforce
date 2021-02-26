@@ -74,16 +74,6 @@ server.prepend('PlaceOrder', server.middleware.https, function (req, res, next) 
         return null;
     }
 
-    var validationOrderStatus = hooksHelper('app.validate.order', 'validateOrder', currentBasket, require('*/cartridge/scripts/hooks/validateOrder').validateOrder);
-    if (validationOrderStatus.error) {
-        res.json({
-            error: true,
-            errorMessage: validationOrderStatus.message
-        });
-        this.emit('route:Complete', req, res);
-        return null;
-    }
-
     // Check to make sure there is a shipping address
     if (currentBasket.defaultShipment.shippingAddress === null) {
         res.json({
@@ -163,24 +153,6 @@ server.prepend('PlaceOrder', server.middleware.https, function (req, res, next) 
             error: true,
             errorMessage: Resource.msg('error.technical', 'checkout', null)
         });
-        this.emit('route:Complete', req, res);
-        return null;
-    }
-
-    var fraudDetectionStatus = hooksHelper('app.fraud.detection', 'fraudDetection', currentBasket, require('*/cartridge/scripts/hooks/fraudDetection').fraudDetection);
-    if (fraudDetectionStatus.status === 'fail') {
-        Transaction.wrap(function () { OrderMgr.failOrder(order, true); });
-
-        // fraud detection failed
-        req.session.privacyCache.set('fraudDetectionStatus', true);
-
-        res.json({
-            error: true,
-            cartError: true,
-            redirectUrl: URLUtils.url('Error-ErrorCode', 'err', fraudDetectionStatus.errorCode).toString(),
-            errorMessage: Resource.msg('error.technical', 'checkout', null)
-        });
-
         this.emit('route:Complete', req, res);
         return null;
     }

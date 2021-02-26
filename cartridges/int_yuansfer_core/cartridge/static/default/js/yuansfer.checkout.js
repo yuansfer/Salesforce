@@ -16,134 +16,6 @@ var placeOrderButton = document.querySelector('button[name=submit]');
 var forceSubmit = false;
 var prUsed = false;
 
-function isSavedCard() {
-    return newCardFormContainer && newCardFormContainer.style.display === 'none';
-}
-
-function copySelectedSaveCardDetails() {
-    var savedCards = document.querySelectorAll('input[name=saved_card_id]');
-
-    for (var i = 0; i < savedCards.length; i++) {
-        var savedCard = savedCards[i];
-        if (savedCard.checked) {
-            cardIdInput.value = savedCard.value;
-            cardNumberInput.value = savedCard.dataset.cardnumber;
-            cardHolderInput.value = savedCard.dataset.cardholder;
-            cardTypeInput.value = savedCard.dataset.cardtype;
-            cardExpMonthInput.value = savedCard.dataset.cardexpmonth;
-            cardExpYearInput.value = savedCard.dataset.cardexpyear;
-            prUsedInput.value = '';
-
-            return true;
-        }
-    }
-
-    return false;
-}
-
-function copyNewCardDetails(paymentMethod) {
-    cardIdInput.value = paymentMethod.id;
-
-    if (paymentMethod.card) {
-        cardNumberInput.value = '************' + paymentMethod.card.last4;
-        cardTypeInput.value = '';
-        cardBrandInput.value = paymentMethod.card.brand;
-        cardExpMonthInput.value = paymentMethod.card.exp_month;
-        cardExpYearInput.value = paymentMethod.card.exp_year;
-    }
-
-    cardHolderInput.value = paymentMethod.billing_details && paymentMethod.billing_details.name;
-    prUsedInput.value = '';
-}
-
-function initNewCardForm() {
-    var postalCodeEl = document.querySelector('input[name$="_postal"]');
-    cardElement = elements.create('card', { value: { postalCode: postalCodeEl.value }, style: JSON.parse(document.getElementById('yuansferCardFormStyle').value) });
-    cardElement.mount('#card-element');
-
-    postalCodeEl.addEventListener('change', function (event) {
-        cardElement.update({ value: { postalCode: event.target.value } });
-    });
-
-    var switchToSavedCardsLink = document.getElementById('switch-to-saved-cards');
-    if (switchToSavedCardsLink) {
-        switchToSavedCardsLink.addEventListener('click', function () {
-            newCardFormContainer.style.display = 'none';
-            savedCardsFormContainer.style.display = 'block';
-        });
-    }
-}
-
-function initSavedCards() {
-    var switchToNewCardLink = document.getElementById('switch-to-add-card');
-    if (switchToNewCardLink) {
-        switchToNewCardLink.addEventListener('click', function () {
-            newCardFormContainer.style.display = 'block';
-            savedCardsFormContainer.style.display = 'none';
-        });
-    }
-}
-
-function initIdeal() {
-    idealBankElement = elements.create('idealBank', { style: JSON.parse(document.getElementById('yuansferIdealElementStyle').value) });
-
-    idealBankElement.mount('#ideal-bank-element');
-}
-
-function populateBillingData(pr) {
-    var payerName = pr.payerName;
-    if (payerName) {
-        var payerNameSplit = payerName.split(' ');
-
-        if (payerNameSplit.length > 1) {
-            var firstName = payerNameSplit[0];
-            var lastName = payerNameSplit[1];
-
-            document.querySelector('input[name$="_firstName"]').value = firstName;
-            document.querySelector('input[name$="_lastName"]').value = lastName;
-        } else {
-            document.querySelector('input[name$="_firstName"]').value = payerName;
-            document.querySelector('input[name$="_lastName"]').value = payerName;
-        }
-    }
-
-    document.querySelector('input[id="cardholder-name"]').value = payerName;
-    document.querySelector('input[name$="_email_emailAddress"]').value = pr.payerEmail;
-    document.querySelector('input[name$="_phone"]').value = pr.payerPhone;
-
-    var selectCountryElement = document.querySelector('select[name$="_country"]');
-    var prCountry = pr.paymentMethod.billing_details.address.country.toLowerCase();
-    var prCountryExists = ($('#' + selectCountryElement.id + ' option[value=' + prCountry + ']').length > 0);
-
-    if (prCountryExists) {
-        selectCountryElement.value = prCountry;
-    }
-
-    document.querySelector('input[name$="_city"]').value = pr.paymentMethod.billing_details.address.city;
-    document.querySelector('input[name$="_postal"]').value = pr.paymentMethod.billing_details.address.postal_code;
-    document.querySelector('input[name$="_address1"]').value = pr.paymentMethod.billing_details.address.line1;
-    document.querySelector('input[name$="_address2"]').value = pr.paymentMethod.billing_details.address.line2;
-
-    var stateElement = document.querySelector('select[name$="_state"]') || document.querySelector('input[name$="_state"]');
-    stateElement.value = pr.paymentMethod.billing_details.address.state;
-}
-
-function getOwnerDetails() {
-    var stateElement = document.querySelector('select[name$="_state"]') || document.querySelector('input[name$="_state"]');
-    return {
-        name: document.querySelector('input[name$="_firstName"]').value + ' ' + document.querySelector('input[name$="_lastName"]').value,
-        address: {
-            line1: document.querySelector('input[name$="_address1"]').value,
-            city: document.querySelector('input[name$="_city"]').value,
-            postal_code: document.querySelector('input[name$="_postal"]').value,
-            country: document.querySelector('select[name$="_country"]').value,
-            state: stateElement ? stateElement.value : ''
-        },
-        email: document.querySelector('input[name$="_email_emailAddress"]').value,
-        phone: document.querySelector('input[name$="_phone"]').value
-    };
-}
-
 function calculateVerifySign(contents,token) {
     //1.对参数进行排序，然后用a=1&b=2..的形式拼接
     var sortArray = [];
@@ -206,16 +78,6 @@ function calculateVerifySign(contents,token) {
     var verifySign = calculateVerifySign(param,token);
     param["verifySign"] =verifySign;
     return param;
-}
-
-
-function processSecurePayResult(result) {
-    if (result.ret_code!="000100") {
-        alert(result.ret_msg);
-    } else {
-
-        document.getElementById('dwfrm_billing').submit();
-    }
 }
 
 function notEmailFormat(email){
@@ -307,34 +169,6 @@ function getGlobalParams() {
 
     
     switch (selectedPaymentMethod) {
-        case 'CREDIT_CARD':
-            if (prUsed) {
-                break;
-            } else if (isSavedCard()) {
-                copySelectedSaveCardDetails();
-            } else {
-                event.preventDefault();
-
-                var cardholderName = document.getElementById('cardholder-name');
-                var owner = getOwnerDetails();
-
-                yuansfer.createPaymentMethod('card', cardElement, {
-                    billing_details: {
-                        name: cardholderName.value,
-                        address: owner.address,
-                        email: owner.email,
-                        phone: owner.phone
-                    }
-                }).then(function (result) {
-                    if (result.error) {
-                        alert(result.error.message);
-                    } else {
-                        copyNewCardDetails(result.paymentMethod);
-                        document.getElementById('dwfrm_billing').submit();
-                    }
-                });
-            }
-            break;
         case 'YUANSFER_CREDITCARD':
 
             params = getSecurePayPayload("creditcard")
@@ -452,41 +286,6 @@ function init() {
 //             }
 //         });  
 // });
-
-function processQRCodeResult(result,vendor) {
-    if (result.ret_code!="000100") {
-        alert(result.ret_msg);
-    } else {
-        switch(vendor){
-            case "wechatpay":
-                var wechatPayQRCodeURL = document.getElementById('yuansfer_wechat_qrcode_url');
-                wechatPayQRCodeURL.value = result.result.qrcodeUrl;   
-                break;
-            case "alipay":
-                var alipayQRCodeURL = document.getElementById('yuansfer_alipay_qrcode_url');
-                alipayQRCodeURL.value = result.result.qrcodeUrl;   
-                break;
-            case "dana":
-                var danaQRCodeURL = document.getElementById('yuansfer_dana_qrcode_url');
-                danaQRCodeURL.value = result.result.qrcodeUrl;   
-                break;
-            case "alipay_hk":
-                var alipayHKQRCodeURL = document.getElementById('yuansfer_alipayhk_qrcode_url');
-                alipayHKQRCodeURL.value = result.result.qrcodeUrl;   
-                break;
-            case "kakaopay":
-                var kakaoPayQRCodeURL = document.getElementById('yuansfer_kakaopay_qrcode_url');
-                kakaoPayQRCodeURL.value = result.result.qrcodeUrl;   
-                break;
-            case "gcash":
-                var gcashQRCodeURL = document.getElementById('yuansfer_gcash_qrcode_url');
-                gcashQRCodeURL.value = result.result.qrcodeUrl;   
-                break;
-                
-        }
-        document.getElementById('dwfrm_billing').submit();
-    }
-}
 
 var ready = (callback) => {
     if (document.readyState !== 'loading') {

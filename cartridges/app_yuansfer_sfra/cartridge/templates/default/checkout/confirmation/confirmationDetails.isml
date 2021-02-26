@@ -1,10 +1,10 @@
 <isset name="yuansferCheckoutHelper" value="${require('*/cartridge/scripts/yuansfer/helpers/checkoutHelper')}" scope="page" />
 <isset name="yuansferPaymentStatus" value="${yuansferCheckoutHelper.getPaymentStatus(pdict.order.orderNumber)}" scope="page" />
 
-<isif condition="${!yuansferPaymentStatus && isConfirmation == null}">
+<isif condition="${yuansferPaymentStatus && !isConfirmation}">
     <div class="container receipt <isif condition="${pdict.order.shipping.length > 1}">multi-ship</isif>">
         <div class="row">
-            <div class="${pdict.returningCustomer ? 'col-sm-6 offset-sm-3' : 'col-sm-6 offset-sm-3 offset-md-0'}">
+            <div class="col-sm-12">
                 <isset name="isWeChatPay" value="${false}" scope="page" />
                 <isset name="isAlipay" value="${false}" scope="page" />
                 <isset name="isDana" value="${false}" scope="page" />
