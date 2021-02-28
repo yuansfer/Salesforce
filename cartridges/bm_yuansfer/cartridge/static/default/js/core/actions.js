@@ -169,13 +169,6 @@ function calculateVerifySign(contents, token) {
     return verifySign;
 }
 
-function performActionAjax(url, params) {
-    return jQuery.ajax({
-        type: 'POST',
-        url: url,
-        data: params
-    });
-}
 function isJson(str) {
     try {
         JSON.parse(str);
@@ -211,26 +204,40 @@ function performAction(task) {
     var verifySign = calculateVerifySign(data, token);
     data.verifySign = verifySign;
     data.orderNumber = orderNumber;
-
     // Send the AJAX request
-    var promise = performActionAjax(actionUrl, data);
-    promise.done(function (res) {
-        console.log(res);
-        if (isJson(res)) {
-            var response = JSON.parse(res);
-            if (response.ret_code != '000100') {
-                showErrorMessage('yuansferErrorMessage', response.ret_msg);
-            } else {
-                // Close the modal window
-                jQuery('.yuansferModal .modal-content .close').trigger('click');
+    jQuery.ajax({
+        type: 'POST',
+        url: actionUrl,
+        data: data,
+        beforeSend:function(){
+            jQuery('#loading').show();
+        },
+        complete: function() {
+            jQuery('#loading').hide();
+        },
+        success: function(res) {
+            if (isJson(res)) {
+                var response = JSON.parse(res);
+                console.log(response.ret_code);
+                if (response.ret_code != '000100') {
+                    showErrorMessage('yuansferErrorMessage');
+                } else {
+                    // Close the modal window
+                    jQuery('.yuansferModal .modal-content .close').trigger('click');
 
-                // Reload the table data
-                // eslint-disable-next-line
-                getTransactions(reloadTable);
+                    // Reload the table data
+                    // eslint-disable-next-line
+                    getTransactions(reloadTable);
+                    setTimeout(function(){
+                        location.reload();
+                    },3000);
+                }
             }
-        }
-    }).fail(function (request, status, error) {
-        console.log(error);
+        },
+        error: function(request, status, error) {
+            // eslint-disable-next-line no-console
+            console.log(error);
+        },
     });
 }
 
@@ -245,6 +252,7 @@ function reloadTable(tableData) {
     // Show the success message
     // eslint-disable-next-line
     showSuccessMessage();
+
 }
 
 /**
@@ -261,3 +269,7 @@ function showSuccessMessage() {
         }
     );
 }
+
+jQuery(window).load(function() {
+    jQuery('#loading').hide();
+});

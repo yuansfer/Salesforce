@@ -38,6 +38,11 @@ nextTitle: dw.web.Resource.msg('yuansfer.pagination.nexttitle', 'yuansfer', null
 
 </isscript>
 <isdecorate template="application/MenuFrame">
+	<div id="loading">
+		<div id="loading_image">
+			${Resource.msg('yuansfer.loader', 'yuansfer', null)}
+		</div>
+	</div>
 	<!-- Encoding -->
 	<iscontent type="text/html" charset="UTF-8">
 	

@@ -15,12 +15,7 @@ server.post('BeforePaymentAuthorization',server.middleware.https, csrfProtection
     var params = JSON.parse( req.httpHeaders.params);
     var responsePayload = yuansferPaymentsHelper.BeforePaymentAuthorization(params);
     res.json(responsePayload);
-    if(responsePayload.error){
-        const redirectUrl = URLUtils.url('Checkout-Begin', 'stage', 'payment');
-        res.redirect(redirectUrl);
-    }else{
-        next();
-    }
+    next();
     
 });
 

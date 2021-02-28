@@ -3,7 +3,6 @@
 /* globals yuansfer */
 // v3
 
-var newCardFormContainer = document.getElementById('new-card-form-container');
 var cardIdInput = document.getElementById('yuansfer_source_id');
 var cardNumberInput = document.getElementById('yuansfer_card_number');
 var cardHolderInput = document.getElementById('yuansfer_card_holder');
@@ -11,10 +10,22 @@ var cardTypeInput = document.getElementById('yuansfer_card_type');
 var cardBrandInput = document.getElementById('yuansfer_card_brand');
 var cardExpMonthInput = document.getElementById('yuansfer_card_expiration_month');
 var cardExpYearInput = document.getElementById('yuansfer_card_expiration_year');
+var paymentMethodOptions = document.querySelectorAll('input[name$="paymentMethod"]');
 
 var placeOrderButton = document.querySelector('button[name=submit]');
 var forceSubmit = false;
 var prUsed = false;
+
+function getSelectedPaymentMethod() {
+    for (var i = 0; i < paymentMethodOptions.length; i++) {
+        var paymentMethodOption = paymentMethodOptions[i];
+        if (paymentMethodOption.checked) {
+            return paymentMethodOption.value;
+        }
+    }
+
+    return null;
+}
 
 function calculateVerifySign(contents,token) {
     //1.对参数进行排序，然后用a=1&b=2..的形式拼接
@@ -121,43 +132,16 @@ document.querySelector('button.submit-payment').addEventListener('click', functi
     if(checkFieldNotPass('#dwfrm_billing .contact-info-block input')){
         return false
     }
-
     $.spinner().start();
-    
-    let yuansferReturnURL = document.getElementById('yuansfer_return_url_in_checkout').value;
-    window.location.replace(yuansferReturnURL);
-    
-    window.setTimeout(()=>{
-        var activeTabId = $('.tab-pane.active').attr('id');
-        var paymentInfoSelector = '#dwfrm_billing .' + activeTabId + ' .payment-form-fields input.form-control';
-        var selectedPaymentMethod = $(paymentInfoSelector).val();
-        window.localStorage.setItem('yuansfer_payment_method', selectedPaymentMethod);
-        
-        if (forceSubmit) return true;
-        var currentParams = getGlobalParams();
-        var token = $('[name="csrf_token"]').val();
-        $.ajax({
-            url: document.getElementById('beforePaymentAuthURL').value,
-            type: 'POST',
-            dataType:"json",
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'params':currentParams
-            },
-            data: {
-                'csrf_token':token
-            }
-        }).done(function (json) {
-            $.spinner().stop();
-        }).fail(function (msg) {
-            if (msg.responseJSON.redirectUrl) {
-                window.location.href = msg.responseJSON.redirectUrl;
-            } else {
-                alert(msg.error);
-            }
-        });   
 
-    },200)
+    let yuansferReturnURL = document.getElementById('yuansfer_return_url_in_checkout').value;
+    var activeTabId = $('.tab-pane.active').attr('id');
+    var paymentInfoSelector = '#dwfrm_billing .' + activeTabId + ' .payment-form-fields input.form-control';
+    var selectedPaymentMethod = $(paymentInfoSelector).val();
+    window.localStorage.setItem('yuansfer_payment_method', selectedPaymentMethod);
+    document.getElementById('dwfrm_billing').submit();
+    window.location.replace(yuansferReturnURL);
+    $.spinner().stop();
 
 });
 
@@ -208,12 +192,6 @@ function getGlobalParams() {
     return JSON.stringify(params);
 }
 
-function init() {
-    if (newCardFormContainer) {
-        initNewCardForm();
-    }
-}
-
 // function handleServerResponse(response) {
 //     if (response.error) {
 //         alert(response.error.message);
@@ -253,43 +231,47 @@ function init() {
 //     }
 // }
 
-// document.querySelector('button.place-order').addEventListener('click', function (event) {
-//         event.preventDefault();
-//         const curButton = document.querySelector('button.place-order');
-//         let saveAction = curButton.dataset.action;
-//         curButton.dataset.action = '';
-//         var activeTabId = $('.tab-pane.active').attr('id');
-//         var paymentInfoSelector = '#dwfrm_billing .' + activeTabId + ' .payment-form-fields input.form-control';
-//         var selectedPaymentMethod = $(paymentInfoSelector).val();
-//         window.localStorage.setItem('yuansfer_payment_method', selectedPaymentMethod);
+document.querySelector('button.place-order').addEventListener('click', function (event) {
+    
+    if(forceSubmit){
+        forceSubmit = false;
+        return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    
+    var currentParams = getGlobalParams();
+    var token = $('[name="csrf_token"]').val();
+    var form = $(this);
+    $.ajax({
+        url: document.getElementById('beforePaymentAuthURL').value,
+        type: 'POST',
+        dataType:"json",
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'params':currentParams
+        },
+        data: {
+            'csrf_token':token
+        }
+    }).done(function (json) {
+        if(json.ret_code == '000100'){
+            forceSubmit = true;
+            form.trigger('click');
+        }else if(json.error){
+            alert(json.error.message);
+        }else{
+            alert(json.ret_msg);
+        }
         
-//         if (forceSubmit) return true;
-//         var currentParams = getGlobalParams();
-//         var token = $('[name="csrf_token"]').val();
-//         $.ajax({
-//             url: document.getElementById('beforePaymentAuthURL').value,
-//             type: 'POST',
-//             dataType:"json",
-//             headers: {
-//                 'X-Requested-With': 'XMLHttpRequest',
-//                 'params':currentParams
-//             },
-//             data: {
-//                 'csrf_token':token
-//             }
-//         }).done(function (json) {
-//             // place order
-//             curButton.dataset.action = saveAction;
-//             // dataset
-//             curButton.click();
-//         }).fail(function (msg) {
-//             if (msg.responseJSON.redirectUrl) {
-//                 window.location.href = msg.responseJSON.redirectUrl;
-//             } else {
-//                 alert(msg.error);
-//             }
-//         });  
-// });
+    }).fail(function (msg) {
+        if (msg.responseJSON.redirectUrl) {
+            window.location.href = msg.responseJSON.redirectUrl;
+        } else {
+            alert(msg.error);
+        }
+    });   
+});
 
 var ready = (callback) => {
     if (document.readyState !== 'loading') {

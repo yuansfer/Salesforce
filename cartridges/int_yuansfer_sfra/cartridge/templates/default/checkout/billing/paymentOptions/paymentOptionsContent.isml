@@ -34,24 +34,7 @@
 <isloop items="${pdict.order.billing.payment.applicablePaymentMethods}" var="paymentOption">
 
     <isif condition="${paymentOption.ID === 'CREDIT_CARD'}">
-        <isinclude template="checkout/billing/paymentOptions/creditCardContent" />
-       <iscomment> <isif condition="${yuansferEnabled}">
-            
-            <div class="tab-pane active ${paymentOption.ID}-content" id="${paymentOption.ID}-content" role="tabpanel">
-                <fieldset class="payment-form-fields">
-
-                    <input type="hidden" class="form-control"
-                        name="${pdict.forms.billingForm.paymentMethod.htmlName}"
-                        value="${paymentOption.ID}"
-                    >
-                    <input type="hidden" name="cardNumber" value="" class="cardNumber" id="cardNumber">
-                    <isinclude template="default/yuansfer/checkout/billing/sfra_cardform" />
-                </fieldset>
-            </div>
-        <iselse/>
-            <isinclude template="checkout/billing/paymentOptions/creditCardContent" />
-        </isif>  </iscomment>
-    
+        <isinclude template="checkout/billing/paymentOptions/creditCardContent" />  
     <iselseif condition="${paymentOption.ID === 'YUANSFER_ALIPAY'}"/>
         <isinclude template="checkout/billing/paymentOptions/alipayContent" />
 	<iselseif condition="${paymentOption.ID === 'YUANSFER_WECHATPAY'}"/>
@@ -70,14 +53,5 @@
         <isinclude template="checkout/billing/paymentOptions/paypalContent" />
     <iselse/>
 
-        <div class="tab-pane ${paymentOption.ID}-content" id="${paymentOption.ID}-content" role="tabpanel">
-            <fieldset class="payment-form-fields">
-
-                <input type="hidden" class="form-control"
-                    name="${pdict.forms.billingForm.paymentMethod.htmlName}"
-                    value="${paymentOption.ID}"
-                >
-            </fieldset>
-        </div>
     </isif>
 </isloop>

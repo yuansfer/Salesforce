@@ -70,25 +70,6 @@ exports.confirmPaymentIntent = function (paymentIntentId) {
     return paymentIntent;
 };
 
-
-/**
- * Check if customer cards should always be saved for guest customers
- * @returns {boolean} true if customer cards always should be saved
- */
-function shouldAlwaysSaveGuestCustomerCards() {
-    return dw.system.Site.getCurrent().getCustomPreferenceValue('yuansferSaveCustomerCards').value === 'always';
-}
-
-/**
- * Check if customer should be asked before save cards on Yuansfer side
- * @returns {boolean} true customer should be asked before save cards on Yuansfer side
- */
-function shouldAskBeforeSaveGuestCustomerCards() {
-    return dw.system.Site.getCurrent().getCustomPreferenceValue('yuansferSaveCustomerCards').value === 'ask';
-}
-
-exports.shouldAskBeforeSaveGuestCustomerCards = shouldAskBeforeSaveGuestCustomerCards;
-
 /**
  * Gets the Yuansfer payment instrument created for a given line item container.
  *
@@ -133,49 +114,8 @@ exports.createYuansferPaymentInstrument = function (lineItemCtnr, paymentMethodI
         paymentInstrument.paymentTransaction.setType(PaymentTransaction.TYPE_CAPTURE);
     }
 
-    if (customer.authenticated) {
-        let yuansferCustomerID = customer.profile.custom.yuansferCustomerID;
-
-        if (params.saveCard) {
-            if (!yuansferCustomerID) {
-                const newYuansferCustomer = yuansferService.customers.create({
-                    email: customer.profile.email,
-                    name: customer.profile.firstName + ' ' + customer.profile.lastName
-                });
-
-                yuansferCustomerID = newYuansferCustomer.id;
-                customer.profile.custom.yuansferCustomerID = yuansferCustomerID;
-            }
-
-            paymentInstrument.custom.yuansferSavePaymentInstrument = true;
-        }
-
-        if (yuansferCustomerID) {
-            paymentInstrument.custom.yuansferCustomerID = yuansferCustomerID;
-        }
-    }
-
-    if (!customer.authenticated && (shouldAlwaysSaveGuestCustomerCards() || (shouldAskBeforeSaveGuestCustomerCards() && params.saveGuestCard))) {
-        const customerEmail = lineItemCtnr.getCustomerEmail();
-
-        const guestCustomerName = lineItemCtnr.getBillingAddress().getFullName();
-
-        const newYuansferGuestCustomer = yuansferService.customers.create({
-            email: customerEmail,
-            name: guestCustomerName
-        });
-
-        paymentInstrument.custom.yuansferSavePaymentForReAuthorise = true;
-
-        paymentInstrument.custom.yuansferSavePaymentInstrument = true;
-
-        if (newYuansferGuestCustomer && newYuansferGuestCustomer.id) {
-            paymentInstrument.custom.yuansferCustomerID = newYuansferGuestCustomer.id;
-        }
-    }
-
     if (paymentInstrument) {
-        delete lineItemCtnr.custom.yuansferIsPaymentIntentInReview; // eslint-disable-line
+        delete lineItemCtnr.custom.yuansferIsPaymentInReview; // eslint-disable-line
     }
 };
 

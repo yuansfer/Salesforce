@@ -2,7 +2,7 @@
     <fieldset class="payment-form-fields">
     
     	<input type="hidden" class="form-control" name="${pdict.forms.billingForm.paymentMethod.htmlName}"
-            value="${paymentOption.ID}">
+            value="${paymentOption.ID}" name=>
         <input type="hidden" name="yuansfer_alipay_qrcode_url" id="yuansfer_alipay_qrcode_url">
 
 		<div class="row">

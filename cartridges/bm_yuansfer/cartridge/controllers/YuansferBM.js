@@ -67,7 +67,10 @@ function remoteCall() {
 
     // Return the response
     // eslint-disable-next-line
-    response.writer.println(JSON.stringify(gResponse));
+    if(gResponse){
+        response.writer.println(JSON.stringify(gResponse));
+    }
+    
 }
 
 /*
