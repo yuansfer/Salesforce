@@ -25,7 +25,7 @@ exports.processIncomingNotification = function (params) {
             var yuansferHelper = require('*/cartridge/scripts/yuansfer/helpers/yuansferHelper');
             var token = yuansferHelper.getYuansferToken();
             var orderId = json.reference.replace(token, '');
-            var order = OrderMgr.getOrder(orderId);
+            var order = OrderMgr.searchOrder('orderNo={0}',orderId);
             const Order = require('dw/order/Order');
             if (!order) {
                 return false;

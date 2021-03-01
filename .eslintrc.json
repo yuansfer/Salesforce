@@ -10,7 +10,10 @@
         "vars-on-top": "off",
         "global-require": "off",
         "no-shadow": ["error", { "allow": ["err", "callback"]}],
-        "max-len": "off"
+        "max-len": "off",
+        "linebreak-style": 0,
+        "no-underscore-dangle": 0,
+        "eqeqeq": 0
     },
     "parserOptions": {
         "ecmaVersion": 2017

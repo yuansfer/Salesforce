@@ -70,7 +70,6 @@ function remoteCall() {
     if(gResponse){
         response.writer.println(JSON.stringify(gResponse));
     }
-    
 }
 
 /*

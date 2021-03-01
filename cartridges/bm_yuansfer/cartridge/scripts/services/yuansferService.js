@@ -78,10 +78,10 @@ function getYuansferServiceDefinition() {
         createRequest: function (svc, requestObject) {
             const Site = require('dw/system/Site');
 
-            svc.addHeader('Content-Type','application/x-www-form-urlencoded;charset=UTF-8');
-        
-            var URL =  svc.configuration.credential.URL;
-            
+            svc.addHeader('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8');
+
+            var URL = svc.configuration.credential.URL;
+
             URL += requestObject.endpoint;
 
             svc.setURL(URL);
@@ -141,11 +141,11 @@ function YuansferServiceError(callResult) {
 * @return {dw.svc.Result} - Result returned by the call.
 */
 function callService(requestObject) {
-   if (!requestObject) {
-       throw new Error('Required requestObject parameter missing or incorrect.');
-   }
+    if (!requestObject) {
+        throw new Error('Required requestObject parameter missing or incorrect.');
+    }
 
-   const callResult = getYuansferServiceDefinition().call(requestObject);
+    const callResult = getYuansferServiceDefinition().call(requestObject);
 
     if (!callResult.ok) {
         throw new YuansferServiceError(callResult);
@@ -163,5 +163,5 @@ exports.refund = {
             payload: params
         };
         return callService(requestObject);
-    },
-}
+    }
+};

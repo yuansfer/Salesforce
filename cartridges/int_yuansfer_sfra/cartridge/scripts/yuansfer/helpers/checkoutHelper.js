@@ -134,9 +134,8 @@ exports.getSiteID = function () {
 exports.getNewYuansferOrderNumber = function () {
     const OrderMgr = require('dw/order/OrderMgr');
     var yuansferOrderNumber = session.privacy.yuansferOrderNumber;
-
     if (!yuansferOrderNumber // Order number has not been created yet
-        || OrderMgr.getOrder(yuansferOrderNumber) // The created order number has already been used, could happen in case a payment authorization attempt fails.
+        || OrderMgr.searchOrder('orderNo={0}',yuansferOrderNumber) // The created order number has already been used, could happen in case a payment authorization attempt fails.
     ) {
         // v1
         // eslint-disable-next-line no-multi-assign
@@ -231,6 +230,7 @@ exports.createOrder = function (currentBasket) {
         });
 
         session.privacy.yuansferOrderNumber = null;
+        session.privacy.yuansferOrderToken = order.orderToken;
         delete session.privacy.yuansferOrderNumber;
     } catch (error) {
         return null;
@@ -397,9 +397,15 @@ exports.getShippingOptions = function () {
  */
 exports.getWeChatPayQRCodeURL = function (orderNumber) {
     const OrderMgr = require('dw/order/OrderMgr');
+    var orderToken = session.privacy.yuansferOrderToken;
+    var order = null;
+    if (orderToken) {
+        order = OrderMgr.getOrder(orderNumber);
+    } else {
+        order = OrderMgr.searchOrder('orderNo={0}',orderNumber);
+    }
 
-    var order = OrderMgr.getOrder(orderNumber);
-
+    delete session.privacy.yuansferOrderToken;
     return !empty(order) ? order.custom.yuansferWeChatPayQRCodeURL : '';
 };
 
@@ -410,9 +416,15 @@ exports.getWeChatPayQRCodeURL = function (orderNumber) {
  */
 exports.getAlipayQRCodeURL = function (orderNumber) {
     const OrderMgr = require('dw/order/OrderMgr');
+    var orderToken = session.privacy.yuansferOrderToken;
+    var order = null;
+    if (orderToken) {
+        order = OrderMgr.getOrder(orderNumber);
+    } else {
+        order = OrderMgr.searchOrder('orderNo={0}',orderNumber);
+    }
 
-    var order = OrderMgr.getOrder(orderNumber);
-
+    delete session.privacy.yuansferOrderToken;
     return !empty(order) ? order.custom.yuansferAlipayQRCodeURL : '';
 };
 
@@ -423,9 +435,15 @@ exports.getAlipayQRCodeURL = function (orderNumber) {
  */
 exports.getKakaoPayCodeURL = function (orderNumber) {
     const OrderMgr = require('dw/order/OrderMgr');
+    var orderToken = session.privacy.yuansferOrderToken;
+    var order = null;
+    if (orderToken) {
+        order = OrderMgr.getOrder(orderNumber);
+    } else {
+        order = OrderMgr.searchOrder('orderNo={0}',orderNumber);
+    }
 
-    var order = OrderMgr.getOrder(orderNumber);
-
+    delete session.privacy.yuansferOrderToken;
     return !empty(order) ? order.custom.yuansferKakaoPayQRCodeURL : '';
 };
 
@@ -436,9 +454,15 @@ exports.getKakaoPayCodeURL = function (orderNumber) {
  */
 exports.getDanaQRCodeURL = function (orderNumber) {
     const OrderMgr = require('dw/order/OrderMgr');
+    var orderToken = session.privacy.yuansferOrderToken;
+    var order = null;
+    if (orderToken) {
+        order = OrderMgr.getOrder(orderNumber);
+    } else {
+        order = OrderMgr.searchOrder('orderNo={0}',orderNumber);
+    }
 
-    var order = OrderMgr.getOrder(orderNumber);
-
+    delete session.privacy.yuansferOrderToken;
     return !empty(order) ? order.custom.yuansferDanaQRCodeURL : '';
 };
 
@@ -449,9 +473,15 @@ exports.getDanaQRCodeURL = function (orderNumber) {
  */
 exports.getGCashQRCodeURL = function (orderNumber) {
     const OrderMgr = require('dw/order/OrderMgr');
+    var orderToken = session.privacy.yuansferOrderToken;
+    var order = null;
+    if (orderToken) {
+        order = OrderMgr.getOrder(orderNumber);
+    } else {
+        order = OrderMgr.searchOrder('orderNo={0}',orderNumber);
+    }
 
-    var order = OrderMgr.getOrder(orderNumber);
-
+    delete session.privacy.yuansferOrderToken;
     return !empty(order) ? order.custom.yuansferGCashQRCodeURL : '';
 };
 
@@ -462,9 +492,15 @@ exports.getGCashQRCodeURL = function (orderNumber) {
  */
 exports.getAlipayHKQRCodeURL = function (orderNumber) {
     const OrderMgr = require('dw/order/OrderMgr');
+    var orderToken = session.privacy.yuansferOrderToken;
+    var order = null;
+    if (orderToken) {
+        order = OrderMgr.getOrder(orderNumber);
+    } else {
+        order = OrderMgr.searchOrder('orderNo={0}',orderNumber);
+    }
 
-    var order = OrderMgr.getOrder(orderNumber);
-
+    delete session.privacy.yuansferOrderToken;
     return !empty(order) ? order.custom.yuansferAlipayHKQRCodeURL : '';
 };
 
@@ -475,9 +511,15 @@ exports.getAlipayHKQRCodeURL = function (orderNumber) {
  */
 exports.getCreditCardQRCodeURL = function (orderNumber) {
     const OrderMgr = require('dw/order/OrderMgr');
+    var orderToken = session.privacy.yuansferOrderToken;
+    var order = null;
+    if (orderToken) {
+        order = OrderMgr.getOrder(orderNumber);
+    } else {
+        order = OrderMgr.searchOrder('orderNo={0}',orderNumber);
+    }
 
-    var order = OrderMgr.getOrder(orderNumber);
-
+    delete session.privacy.yuansferOrderToken;
     return !empty(order) ? order.custom.yuansferCreditCardQRCodeURL : '';
 };
 
@@ -488,9 +530,15 @@ exports.getCreditCardQRCodeURL = function (orderNumber) {
  */
 exports.getPaypalQRCodeURL = function (orderNumber) {
     const OrderMgr = require('dw/order/OrderMgr');
+    var orderToken = session.privacy.yuansferOrderToken;
+    var order = null;
+    if (orderToken) {
+        order = OrderMgr.getOrder(orderNumber);
+    } else {
+        order = OrderMgr.searchOrder('orderNo={0}',orderNumber);
+    }
 
-    var order = OrderMgr.getOrder(orderNumber);
-
+    delete session.privacy.yuansferOrderToken;
     return !empty(order) ? order.custom.yuansferPaypalQRCodeURL : '';
 };
 
@@ -501,9 +549,13 @@ exports.getPaypalQRCodeURL = function (orderNumber) {
  */
 exports.getTransactionNo = function (orderNumber) {
     const OrderMgr = require('dw/order/OrderMgr');
-
-    var order = OrderMgr.getOrder(orderNumber);
-
+    var orderToken = session.privacy.yuansferOrderToken;
+    var order = null;
+    if (orderToken) {
+        order = OrderMgr.getOrder(orderNumber);
+    } else {
+        order = OrderMgr.searchOrder('orderNo={0}',orderNumber);
+    }
     return !empty(order) ? order.custom.yuansferTransactionNo : '';
 };
 
@@ -514,9 +566,13 @@ exports.getTransactionNo = function (orderNumber) {
  */
 exports.getPaymentStatus = function (orderNumber) {
     const OrderMgr = require('dw/order/OrderMgr');
-
-    var order = OrderMgr.getOrder(orderNumber);
-
+    var orderToken = session.privacy.yuansferOrderToken;
+    var order = null;
+    if (orderToken) {
+        order = OrderMgr.getOrder(orderNumber);
+    } else {
+        order = OrderMgr.searchOrder('orderNo={0}',orderNumber);
+    }
     return !empty(order) ? order.custom.yuansferIsPaymentInReview : '';
 };
 

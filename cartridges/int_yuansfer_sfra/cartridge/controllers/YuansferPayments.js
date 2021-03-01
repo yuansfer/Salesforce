@@ -10,28 +10,26 @@ const URLUtils = require('dw/web/URLUtils');
 /**
  * Entry point for handling payment intent creation and confirmation AJAX calls.
  */
-server.post('BeforePaymentAuthorization',server.middleware.https, csrfProtection.validateAjaxRequest, function (req, res, next) {
-    
-    var params = JSON.parse( req.httpHeaders.params);
+server.post('BeforePaymentAuthorization', server.middleware.https, csrfProtection.validateAjaxRequest, function (req, res, next) {
+    var params = JSON.parse(req.httpHeaders.params);
     var responsePayload = yuansferPaymentsHelper.BeforePaymentAuthorization(params);
     res.json(responsePayload);
     next();
-    
 });
 
 /**
  * Entry point for handling transaction search.
  */
-server.post('HandleConfirm',function (req, res, next) {
+server.post('HandleConfirm', function (req, res, next) {
     var bodyParams = req.httpParameterMap.requestBodyAsString;
     var params = yuansferPaymentsHelper.DecodeFormParams(bodyParams);
     var responsePayload = yuansferPaymentsHelper.SearchTransaction(params);
-    if(responsePayload.ret_code == "000100"){
-        if(responsePayload.result.status == "success"){
+    if (responsePayload.ret_code == '000100') {
+        if (responsePayload.result.status == 'success') {
             var placeOrderParams = params;
-            placeOrderParams['transactionNo'] = responsePayload.result.transactionNo;
+            placeOrderParams.transactionNo = responsePayload.result.transactionNo;
             const confirmPaymentHelper = require('*/cartridge/scripts/yuansfer/helpers/confirmPaymentHelper');
-            var success = confirmPaymentHelper.processIncomingNotification(placeOrderParams);
+            confirmPaymentHelper.processIncomingNotification(placeOrderParams);
         }
     }
     res.json(responsePayload);

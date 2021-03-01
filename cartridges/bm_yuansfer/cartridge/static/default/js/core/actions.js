@@ -209,13 +209,13 @@ function performAction(task) {
         type: 'POST',
         url: actionUrl,
         data: data,
-        beforeSend:function(){
+        beforeSend: function () {
             jQuery('#loading').show();
         },
-        complete: function() {
+        complete: function () {
             jQuery('#loading').hide();
         },
-        success: function(res) {
+        success: function (res) {
             if (isJson(res)) {
                 var response = JSON.parse(res);
                 console.log(response.ret_code);
@@ -228,16 +228,16 @@ function performAction(task) {
                     // Reload the table data
                     // eslint-disable-next-line
                     getTransactions(reloadTable);
-                    setTimeout(function(){
+                    setTimeout(function () {
                         location.reload();
-                    },3000);
+                    }, 3000);
                 }
             }
         },
-        error: function(request, status, error) {
+        error: function (request, status, error) {
             // eslint-disable-next-line no-console
             console.log(error);
-        },
+        }
     });
 }
 
@@ -252,7 +252,6 @@ function reloadTable(tableData) {
     // Show the success message
     // eslint-disable-next-line
     showSuccessMessage();
-
 }
 
 /**
@@ -270,6 +269,6 @@ function showSuccessMessage() {
     );
 }
 
-jQuery(window).load(function() {
+jQuery(window).load(function () {
     jQuery('#loading').hide();
 });
