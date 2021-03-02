@@ -278,32 +278,6 @@ var YuansferHelper = {
         return totalFormated.toFixed();
     },
 
-    setPaymentStatus: function (order) {
-        var paymentInstruments = order.getPaymentInstruments().toArray(),
-            amountPaid = 0,
-            orderTotal = order.getTotalGrossPrice().getValue();
-
-        for (var i = 0; i < paymentInstruments.length; i++) {
-            var paymentTransaction = paymentInstruments[i].paymentTransaction;
-            if (paymentTransaction.type.value === 'CAPTURE') {
-                amountPaid += paymentTransaction.amount.value;
-                if (amountPaid > orderTotal) {
-                    amountPaid = orderTotal;
-                }
-            } else if (paymentTransaction.type.value === 'CREDIT') {
-                amountPaid -= paymentTransaction.amount.value;
-            }
-        }
-
-        if (amountPaid === orderTotal) {
-            order.setPaymentStatus(order.PAYMENT_STATUS_PAID);
-        } else if (amountPaid >= 0.01) {
-            order.setPaymentStatus(order.PAYMENT_STATUS_PARTPAID);
-        } else {
-            order.setPaymentStatus(order.PAYMENT_STATUS_NOTPAID);
-        }
-    },
-
     /**
      * Currency conversion mapping.
      * @param {string} currency The currency code
@@ -329,19 +303,47 @@ var YuansferHelper = {
         var paymentInstrument;
         var amount = new Money(params.amount, params.currency);
         Transaction.wrap(function () {
-            try {
-                paymentInstrument = order.createPaymentInstrument(paymentProcessorId, amount);
-            } catch (e) {
-                var a = e;
-            }
-
+            paymentInstrument = order.createPaymentInstrument(paymentProcessorId, amount);
 
             paymentInstrument.paymentTransaction.transactionID = params.orderNumber;
             paymentInstrument.paymentTransaction.paymentProcessor = paymentProcessor;
             paymentInstrument.paymentTransaction.custom.yuansferOrderNumber = params.orderNumber;
             paymentInstrument.paymentTransaction.custom.yuansferTransactionOpened = false;
             paymentInstrument.paymentTransaction.setType(PaymentTransaction.TYPE_CREDIT);
+
+            try{
+                var setPaymentPaymentInstruments = order.getPaymentInstruments().toArray(),
+                amountPaid = 0,
+                orderTotal = order.getTotalGrossPrice().getValue();
+
+                for (var i = 0; i < setPaymentPaymentInstruments.length; i++) {
+                    var paymentTransaction = setPaymentPaymentInstruments[i].paymentTransaction;
+                    if (paymentTransaction.type.value === 'CAPTURE') {
+                        amountPaid += paymentTransaction.amount.value;
+                        if (amountPaid > orderTotal) {
+                            amountPaid = orderTotal;
+                        }
+                    } else if (paymentTransaction.type.value === 'CREDIT') {
+                        amountPaid -= paymentTransaction.amount.value;
+                    }
+                }
+                var Order = require('dw/order/Order');
+                if (amountPaid === orderTotal) {
+                    order.setPaymentStatus(Order.PAYMENT_STATUS_PAID);
+                } else if (amountPaid >= 0.01) {
+                    order.setPaymentStatus(Order.PAYMENT_STATUS_PARTPAID);
+                } else {
+                    order.setPaymentStatus(Order.PAYMENT_STATUS_NOTPAID);
+                    OrderMgr.cancelOrder(order);
+                }
+            }catch(e){
+                var a =e ;
+                var b= e;
+            }
+
+
         });
+
     },
 
     getYuansferToken: function () {

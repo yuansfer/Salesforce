@@ -30,7 +30,7 @@ exports.processIncomingNotification = function (params) {
             if (!order) {
                 return false;
             }
-            if (order.status === Order.ORDER_STATUS_CREATED) {
+            if (order.status.value === Order.ORDER_STATUS_CREATED) {
                 OrderMgr.placeOrder(order);
             }
             order.custom.yuansferIsPaymentInReview = false; // eslint-disable-line no-param-reassign

@@ -26,21 +26,13 @@
 	  else document.addEventListener("DOMContentLoaded", callback);
 	}
 
-	// ready(() => {
-	//   new QRCode(document.getElementById("alipayQRCode"), "${yuansferAlipayQRCodeURL}");
-	// });
 	ready(() => {
-        // var elem = document.createElement("img");
-        // elem.setAttribute("height", "100");
-        // elem.setAttribute("width", "100");
-        // elem.src= "${yuansferAlipayQRCodeURL}";
-	    // document.getElementById("alipayQRCode").appendChild(elem);
 		  new QRCode(document.getElementById("alipayQRCode"),
-         {
-           text: "${yuansferAlipayQRCodeURL}",
-           width: 100,
-           height: 100
-         });
+      {
+        text: "${yuansferAlipayQRCodeURL}",
+        width: 100,
+        height: 100
+      });
 	});
 
 </script>

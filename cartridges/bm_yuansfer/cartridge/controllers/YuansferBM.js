@@ -65,11 +65,11 @@ function remoteCall() {
         });
     }
 
+
     // Return the response
     // eslint-disable-next-line
-    if(gResponse){
-        response.writer.println(JSON.stringify(gResponse));
-    }
+    response.writer.println(JSON.stringify(gResponse));
+
 }
 
 /*

@@ -178,11 +178,34 @@ function isJson(str) {
     return true;
 }
 
+function ajaxCall(data,url){
+
+    return new Promise(resolve=>{
+        jQuery.ajax({
+            type:'POST',
+            url:url,
+            data:data,
+            beforeSend: function () {
+                jQuery('#loading').show();
+            },
+            complete: function () {
+                jQuery('#loading').hide();
+            },
+            success: function(res){
+                resolve(res);
+            },
+            error: function(error){
+                resolve(res);
+            }
+        });
+    })
+}
+
 /**
  * Perform a transaction action.
  * @param {string} task The task to perform
  */
-function performAction(task) {
+async function performAction(task) {
     // set params
     var actionUrl = jQuery('[id="actionControllerUrl"]').val();
     var currency = jQuery('[id="' + task + '_currency"]').text();
@@ -205,38 +228,22 @@ function performAction(task) {
     data.verifySign = verifySign;
     data.orderNumber = orderNumber;
     // Send the AJAX request
-    jQuery.ajax({
-        type: 'POST',
-        url: actionUrl,
-        data: data,
-        beforeSend: function () {
-            jQuery('#loading').show();
-        },
-        complete: function () {
-            jQuery('#loading').hide();
-        },
-        success: function (res) {
-            if (isJson(res)) {
-                var response = JSON.parse(res);
-                console.log(response.ret_code);
-                if (response.ret_code != '000100') {
-                    showErrorMessage('yuansferErrorMessage');
-                } else {
-                    // Close the modal window
-                    jQuery('.yuansferModal .modal-content .close').trigger('click');
-
-                    // Reload the table data
-                    // eslint-disable-next-line
-                    getTransactions(reloadTable);
-                    setTimeout(function () {
-                        location.reload();
-                    }, 3000);
-                }
-            }
-        },
-        error: function (request, status, error) {
-            // eslint-disable-next-line no-console
-            console.log(error);
+    ajaxCall(data,actionUrl).then(function(res){
+        var response = JSON.parse(res);
+        console.log(response.ret_code);
+        if (response.ret_code != '000100') {
+            console.log("failed");
+            showErrorMessage('yuansferErrorMessage');
+        } else {
+            // Close the modal window
+            jQuery('.yuansferModal .modal-content .close').trigger('click');
+            console.log("success");
+            // Reload the table data
+            // eslint-disable-next-line
+            getTransactions(reloadTable);
+            setTimeout(function () {
+                location.reload();
+            }, 1500);
         }
     });
 }
