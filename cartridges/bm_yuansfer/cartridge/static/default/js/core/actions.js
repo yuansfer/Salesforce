@@ -146,8 +146,13 @@ function showErrorMessage(selector) {
     );
 }
 
+/**
+ * Used to calculate verify sign
+ * @param {string} contents
+ * @param {string} token
+ */
 function calculateVerifySign(contents, token) {
-    // 1.对参数进行排序，然后用a=1&b=2..的形式拼接
+    // 1.sort parameter，connect them with a=1&b=2.. format
     var sortArray = [];
 
     Object.keys(contents).sort().forEach(function (k) {
@@ -156,19 +161,21 @@ function calculateVerifySign(contents, token) {
         }
     });
 
-    // 对token进行md5，得到的结果追加到sortArray之后
+    // md5 encrypt token，append result after sortArray
     sortArray.push(MD5(token));
 
     var tempStr = sortArray.join('&');
-    // console.log('tempStr:', tempStr);
 
-    // 对tempStr 再进行一次md5加密得到verifySign
+    // md5 encrypt tempStr to get verify sign
     var verifySign = MD5(tempStr);
-    // console.log('veirfySign:', verifySign)
 
     return verifySign;
 }
 
+/**
+ * Used to determine if string is Json String
+ * @param {string} str
+ */
 function isJson(str) {
     try {
         JSON.parse(str);
@@ -178,6 +185,11 @@ function isJson(str) {
     return true;
 }
 
+/**
+ *  Making ajax call to refund
+ * @param {string} data
+ * @param {string} url
+ */
 function ajaxCall(data,url){
 
     return new Promise(resolve=>{

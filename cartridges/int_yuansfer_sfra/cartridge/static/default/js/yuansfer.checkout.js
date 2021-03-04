@@ -10,25 +10,18 @@ var cardTypeInput = document.getElementById('yuansfer_card_type');
 var cardBrandInput = document.getElementById('yuansfer_card_brand');
 var cardExpMonthInput = document.getElementById('yuansfer_card_expiration_month');
 var cardExpYearInput = document.getElementById('yuansfer_card_expiration_year');
-var paymentMethodOptions = document.querySelectorAll('input[name$="paymentMethod"]');
 
 var placeOrderButton = document.querySelector('button[name=submit]');
 var forceSubmit = false;
 var prUsed = false;
 
-function getSelectedPaymentMethod() {
-    for (var i = 0; i < paymentMethodOptions.length; i++) {
-        var paymentMethodOption = paymentMethodOptions[i];
-        if (paymentMethodOption.checked) {
-            return paymentMethodOption.value;
-        }
-    }
-
-    return null;
-}
-
+/**
+ * Used to calculate verify sign
+ * @param {string} contents
+ * @param {string} token
+ */
 function calculateVerifySign(contents, token) {
-    // 1.对参数进行排序，然后用a=1&b=2..的形式拼接
+    // 1.sort parameter，connect them with a=1&b=2.. format
     var sortArray = [];
 
     Object.keys(contents).sort().forEach(function (k) {
@@ -37,19 +30,21 @@ function calculateVerifySign(contents, token) {
         }
     });
 
-    // 对token进行md5，得到的结果追加到sortArray之后
+    // md5 encrypt token，append result after sortArray
     sortArray.push(MD5(token));
 
     var tempStr = sortArray.join('&');
-    // console.log('tempStr:', tempStr);
 
-    // 对tempStr 再进行一次md5加密得到verifySign
+    // md5 encrypt tempStr to get verify sign
     var verifySign = MD5(tempStr);
-    // console.log('veirfySign:', verifySign)
 
     return verifySign;
 }
 
+/**
+ * get yuansfer request payload
+ * @param {string} vendor
+ */
 function getSecurePayPayload(vendor) {
     var merchantNo = document.getElementById('yuansfer_merchant_no').value;
     var storeNo = document.getElementById('yuansfer_store_no').value;
@@ -91,6 +86,10 @@ function getSecurePayPayload(vendor) {
     return param;
 }
 
+/**
+ * validate on email format
+ * @param {string} email
+ */
 function notEmailFormat(email) {
      /**
        * @return {boolean}
@@ -99,6 +98,10 @@ function notEmailFormat(email) {
     return !reg.test(email);
 }
 
+/**
+ * check if field is valid
+ * @param {element} seletor
+ */
 function checkFieldNotPass(seletor) {
     // check fields
     var flag = false;
@@ -117,16 +120,6 @@ function checkFieldNotPass(seletor) {
     return flag;
 }
 
-function placeHolderOption(text) {
-    const optionElement = document.createElement('option');
-    optionElement.selected = 'selected';
-    optionElement.disabled = 'disabled';
-    optionElement.hidden = 'hidden';
-    optionElement.value = '';
-    optionElement.innerHTML = text;
-    return optionElement;
-}
-
 document.querySelector('button.submit-payment').addEventListener('click', function (event) {
     if (checkFieldNotPass('#dwfrm_billing .contact-info-block input')) {
         return false;
@@ -143,11 +136,13 @@ document.querySelector('button.submit-payment').addEventListener('click', functi
     $.spinner().stop();
 });
 
+/**
+ * Get Yuansfer global params
+ */
 function getGlobalParams() {
     var selectedPaymentMethod = window.localStorage.getItem('yuansfer_payment_method');
     // var params = getSecurePayPayload();
     let params;
-
 
     switch (selectedPaymentMethod) {
         case 'YUANSFER_CREDITCARD':
@@ -188,45 +183,6 @@ function getGlobalParams() {
     }
     return JSON.stringify(params);
 }
-
-// function handleServerResponse(response) {
-//     if (response.error) {
-//         alert(response.error.message);
-//         window.location.replace(document.getElementById('billingPageUrl').value);
-//     } else if (response.requires_action) {
-//         yuansfer.handleCardAction(response.payment_intent_client_secret).then(function (result) {
-//             if (result.error) {
-//                 alert(result.error.message);
-//                 window.location.replace(document.getElementById('billingPageUrl').value);
-//             } else {
-//                 // The card action has been handled
-//                 // The PaymentIntent can be confirmed again on the server
-//                 $.ajax({
-//                     url: document.getElementById('beforePaymentAuthURL').value,
-//                     method: 'POST',
-//                     dataType: 'json',
-//                     headers: {
-//                         'X-Requested-With': 'XMLHttpRequest'
-//                     },
-//                     data: {
-//                         csrf_token: $('[name="csrf_token"]').val()
-//                     }
-//                 }).done(function (json) {
-//                     handleServerResponse(json);
-//                 }).fail(function (msg) {
-//                     if (msg.responseJSON.redirectUrl) {
-//                         window.location.href = msg.responseJSON.redirectUrl;
-//                     } else {
-//                         alert(msg.error);
-//                     }
-//                 });
-//             }
-//         });
-//     } else {
-//         forceSubmit = true;
-//         placeOrderButton.click();
-//     }
-// }
 
 document.querySelector('button.place-order').addEventListener('click', function (event) {
     if (forceSubmit) {

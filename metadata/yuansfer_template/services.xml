@@ -18,7 +18,7 @@
         <service-type>HTTP</service-type>
         <enabled>true</enabled>
         <log-prefix>Yuansfer</log-prefix>
-        <comm-log-enabled>true</comm-log-enabled>
+        <comm-log-enabled>false</comm-log-enabled>
         <force-prd-enabled>false</force-prd-enabled>
         <mock-mode-enabled>false</mock-mode-enabled>
         <profile-id>YuansferProfile</profile-id>

@@ -6,11 +6,10 @@ var server = require('server');
 
 var yuansferPaymentsHelper = require('*/cartridge/scripts/yuansfer/helpers/controllers/yuansferPaymentsHelper');
 var csrfProtection = require('*/cartridge/scripts/middleware/csrf');
-const URLUtils = require('dw/web/URLUtils');
 /**
  * Entry point for handling payment intent creation and confirmation AJAX calls.
  */
-server.post('BeforePaymentAuthorization', server.middleware.https, csrfProtection.validateAjaxRequest, function (req, res, next) {
+server.post('BeforePaymentAuthorization', server.middleware.https, csrfProtection.validateAjaxRequest, function(req, res, next) {
     var params = JSON.parse(req.httpHeaders.params);
     var responsePayload = yuansferPaymentsHelper.BeforePaymentAuthorization(params);
     res.json(responsePayload);
@@ -20,15 +19,15 @@ server.post('BeforePaymentAuthorization', server.middleware.https, csrfProtectio
 /**
  * Entry point for handling transaction search.
  */
-server.post('HandleConfirm', function (req, res, next) {
+server.post('HandleConfirm', function(req, res, next) {
     var bodyParams = req.httpParameterMap.requestBodyAsString;
     var params = yuansferPaymentsHelper.DecodeFormParams(bodyParams);
     var responsePayload = yuansferPaymentsHelper.SearchTransaction(params);
-    if (responsePayload.ret_code == '000100') {
-        if (responsePayload.result.status == 'success') {
+    if (responsePayload.ret_code === '000100') {
+        if (responsePayload.result.status === 'success') {
             var placeOrderParams = params;
             placeOrderParams.transactionNo = responsePayload.result.transactionNo;
-            const confirmPaymentHelper = require('*/cartridge/scripts/yuansfer/helpers/confirmPaymentHelper');
+            var confirmPaymentHelper = require('*/cartridge/scripts/yuansfer/helpers/confirmPaymentHelper');
             confirmPaymentHelper.processIncomingNotification(placeOrderParams);
         }
     }
@@ -41,7 +40,7 @@ server.post('HandleConfirm', function (req, res, next) {
  * An entry point to handle returns from alternative payment methods.
  */
 
-server.get('HandleAPM', function (req, res, next) {
+server.get('HandleAPM', function(req, res, next) {
     var redirectUrl = yuansferPaymentsHelper.HandleAPM(true);
     res.redirect(redirectUrl);
     next();
@@ -50,7 +49,7 @@ server.get('HandleAPM', function (req, res, next) {
 /**
  * Get Yuansfer Order Items
  */
-server.get('GetYuansferOrderItems', function (req, res, next) {
+server.get('GetYuansferOrderItems', function(req, res, next) {
     var BasketMgr = require('dw/order/BasketMgr');
     var basket = BasketMgr.getCurrentBasket();
 
@@ -58,7 +57,7 @@ server.get('GetYuansferOrderItems', function (req, res, next) {
 
     res.json({
         amount: yuansferOrderDetails ? yuansferOrderDetails.amount : [],
-        orderItems: yuansferOrderDetails ? yuansferOrderDetails.order_items : []
+        orderItems: yuansferOrderDetails ? yuansferOrderDetails.order_items : [],
     });
 
     next();

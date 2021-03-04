@@ -2,14 +2,13 @@
 
 /* API Includes */
 var SystemObjectMgr = require('dw/object/SystemObjectMgr');
-var OrderMgr = require('dw/order/OrderMgr');
 var PaymentMgr = require('dw/order/PaymentMgr');
 var PaymentTransaction = require('dw/order/PaymentTransaction');
 var Resource = require('dw/web/Resource');
 var Logger = require('dw/system/Logger');
-var Site = require('dw/system/Site');
 var Transaction = require('dw/system/Transaction');
 var Money = require('dw/value/Money');
+var OrderMgr = require('dw/order/OrderMgr');
 
 /**
  * Helper functions for the cartridge integration.
@@ -21,7 +20,7 @@ var YuansferHelper = {
      * @param {string} strFile The translation file
      * @returns {string} Retuns the translated string
      */
-    _: function (strValue, strFile) {
+    _: function(strValue, strFile) {
         return Resource.msg(strValue, strFile, null);
     },
 
@@ -29,7 +28,7 @@ var YuansferHelper = {
      * Get the orders.
      * @returns {array} Retuns the orders array
      */
-    getYuansferOrders: function () {
+    getYuansferOrders: function() {
         // Prepare the output array
         var data = [];
 
@@ -58,7 +57,7 @@ var YuansferHelper = {
      * Get the transactions.
      * @returns {array} Retuns the transactions array
      */
-    getYuansferTransactions: function () {
+    getYuansferTransactions: function() {
         // Prepare the output array
         var data = [];
 
@@ -74,14 +73,12 @@ var YuansferHelper = {
             // Loop through the payment instruments
             for (var k = 0; k < paymentInstruments.length; k++) {
                 // Get the payment transaction
-                const OrderMgr = require('dw/order/OrderMgr');
                 var paymentTransaction = paymentInstruments[k].getPaymentTransaction();
-                var transactionNo = OrderMgr.getOrder(result[j].orderNo,result[j].orderToken).custom.yuansferTransactionNo;
+                var transactionNo = OrderMgr.getOrder(result[j].orderNo, result[j].orderToken).custom.yuansferTransactionNo;
 
                 // Add the payment transaction to the output
                 if (!this.containsObject(paymentTransaction, data) && this.isTransactionNeeded(paymentTransaction, paymentInstruments[k], transactionNo)) {
                     // Build the row data
-
 
                     var row = {
                         id: i,
@@ -95,7 +92,7 @@ var YuansferHelper = {
                         type: paymentTransaction.type.displayValue,
                         processor: this.getProcessorId(paymentInstruments[k]),
                         refundable_amount: 0,
-                        data_type: paymentTransaction.type.toString()
+                        data_type: paymentTransaction.type.toString(),
                     };
 
                     // Calculate the refundable amount
@@ -105,9 +102,9 @@ var YuansferHelper = {
                         row.refundable_amount = this.getRefundableAmount(paymentInstruments);
                     }
 
-                    if(row.refundable_amount==='0.00' && row.transaction_id){
-                        row.type = "REFUNDED";
-                        row.data_type = "REFUNDED";
+                    if (row.refundable_amount === '0.00' && row.transaction_id) {
+                        row.type = 'REFUNDED';
+                        row.data_type = 'REFUNDED';
                     }
                     // Add the transaction
                     data.push(row);
@@ -124,7 +121,7 @@ var YuansferHelper = {
      * @param {array} paymentInstruments The paymentInstruments array
      * @returns {number} The refundable amount
      */
-    getRefundableAmount: function (paymentInstruments) {
+    getRefundableAmount: function(paymentInstruments) {
         // Prepare the totals
         var totalRefunded = 0;
         var totalCaptured = 0;
@@ -155,9 +152,10 @@ var YuansferHelper = {
      * Checks if a transaction should be returned in the reaults.
      * @param {Object} paymentTransaction The paymentTransaction object
      * @param {Object} paymentInstrument The paymentInstrument object
+     * @param {Object} transactionNo The transaction number
      * @returns {boolean} The status of the current transaction
      */
-    isTransactionNeeded: function (paymentTransaction, paymentInstrument, transactionNo) {
+    isTransactionNeeded: function(paymentTransaction, paymentInstrument, transactionNo) {
         // Get an optional transaction id
         // eslint-disable-next-line
         var tid = request.httpParameterMap.get('tid').stringValue;
@@ -180,7 +178,7 @@ var YuansferHelper = {
      * @param {Object} item The payment instrument
      * @returns {boolean} The status of the current payment instrument
      */
-    isYuansferItem: function (item) {
+    isYuansferItem: function(item) {
         return item.length > 0 && (item.indexOf('YUANSFER_WECHATPAY') >= 0 || item.indexOf('YUANSFER_ALIPAY') >= 0 || item.indexOf('YUANSFER_KAKAOPAY') >= 0 || item.indexOf('YUANSFER_GCASH') >= 0
         || item.indexOf('YUANSFER_ALIPAYHK') >= 0 || item.indexOf('YUANSFER_DANA') >= 0 || item.indexOf('YUANSFER_CREDITCARD') >= 0 || item.indexOf('YUANSFER_APM') >= 0 || item.indexOf('YUANSFER_PAYPAL') >= 0);
     },
@@ -190,7 +188,7 @@ var YuansferHelper = {
      * @param {Object} instrument The payment instrument
      * @returns {string} The payment instrument Id
      */
-    getProcessorId: function (instrument) {
+    getProcessorId: function(instrument) {
         var paymentMethod = PaymentMgr.getPaymentMethod(instrument.getPaymentMethod());
         if (paymentMethod) {
             if (paymentMethod.getPaymentProcessor()) {
@@ -206,7 +204,7 @@ var YuansferHelper = {
      * @param {array} list The list of objects to parse
      * @returns {boolean} The status of the current object
      */
-    containsObject: function (obj, list) {
+    containsObject: function(obj, list) {
         var i;
         for (i = 0; i < list.length; i++) {
             if (list[i] === obj) {
@@ -222,7 +220,7 @@ var YuansferHelper = {
      * @param {string} dataType The data type
      * @param {Object} gatewayData The gateway data
      */
-    log: function (dataType, gatewayData) {
+    log: function(dataType, gatewayData) {
         if ((gatewayData)) {
             // Get the logger
             var logger = Logger.getLogger('yuansferdebug');
@@ -238,8 +236,8 @@ var YuansferHelper = {
      * @param {Object} params The request data
      * @returns {Object} The HTTP response
      */
-    createRefund: function (params) {
-        const yuansferService = require('*/cartridge/scripts/services/yuansferService');
+    createRefund: function(params) {
+        var yuansferService = require('*/cartridge/scripts/services/yuansferService');
         var resp = yuansferService.refund.create(params);
 
         return resp;
@@ -250,7 +248,7 @@ var YuansferHelper = {
      * @param {string} serviceId The service Id
      * @returns {Object} The service instance
      */
-    getService: function (serviceId) {
+    getService: function(serviceId) {
         var parts = serviceId.split('.');
         var entity = parts[1];
         var action = parts[2];
@@ -262,39 +260,12 @@ var YuansferHelper = {
     },
 
     /**
-     * Returns a price formatted for processing by the gateway.
-     * @param {number} amount The amount to format
-     * @returns {number} The formatted amount
+     *  Change refund status
+     * @param {Object} params parameters
      */
-    getFormattedPrice: function (amount, currency) {
-        var totalFormated;
-        if (currency) {
-            var yuansferFormateBy = this.getYuansferFormatedValue(currency);
-            totalFormated = amount * yuansferFormateBy;
-
-            return totalFormated.toFixed();
-        }
-        totalFormated = amount * 100;
-        return totalFormated.toFixed();
-    },
-
-    /**
-     * Currency conversion mapping.
-     * @param {string} currency The currency code
-     * @returns {number} The conversion factor
-     */
-    getYuansferFormatedValue: function (currency) {
-        if (yuansferCurrencyConfig.x1.currencies.match(currency)) {
-            return yuansferCurrencyConfig.x1.multiple;
-        } else if (yuansferCurrencyConfig.x1000.currencies.match(currency)) {
-            return yuansferCurrencyConfig.x1000.multiple;
-        }
-        return 100;
-    },
-
-    paymentRefunded: function (params) {
+    paymentRefunded: function(params) {
         // Load the order
-        var order = OrderMgr.searchOrder('orderNo={0}',params.orderNumber);
+        var order = OrderMgr.searchOrder('orderNo={0}', params.orderNumber);
 
         // Get the payment processor id
         var paymentProcessorId = order.paymentInstrument.paymentTransaction.paymentProcessor.ID;
@@ -302,7 +273,7 @@ var YuansferHelper = {
         // Create the refunded transaction
         var paymentInstrument;
         var amount = new Money(params.amount, params.currency);
-        Transaction.wrap(function () {
+        Transaction.wrap(function() {
             paymentInstrument = order.createPaymentInstrument(paymentProcessorId, amount);
 
             paymentInstrument.paymentTransaction.transactionID = params.orderNumber;
@@ -311,61 +282,56 @@ var YuansferHelper = {
             paymentInstrument.paymentTransaction.custom.yuansferTransactionOpened = false;
             paymentInstrument.paymentTransaction.setType(PaymentTransaction.TYPE_CREDIT);
 
-            try{
-                var setPaymentPaymentInstruments = order.getPaymentInstruments().toArray(),
-                amountPaid = 0,
-                orderTotal = order.getTotalGrossPrice().getValue();
+            var setPaymentPaymentInstruments = order.getPaymentInstruments().toArray();
+            var amountPaid = 0;
+            var orderTotal = order.getTotalGrossPrice().getValue();
 
-                for (var i = 0; i < setPaymentPaymentInstruments.length; i++) {
-                    var paymentTransaction = setPaymentPaymentInstruments[i].paymentTransaction;
-                    if (paymentTransaction.type.value === 'CAPTURE') {
-                        amountPaid += paymentTransaction.amount.value;
-                        if (amountPaid > orderTotal) {
-                            amountPaid = orderTotal;
-                        }
-                    } else if (paymentTransaction.type.value === 'CREDIT') {
-                        amountPaid -= paymentTransaction.amount.value;
+            for (var i = 0; i < setPaymentPaymentInstruments.length; i++) {
+                var paymentTransaction = setPaymentPaymentInstruments[i].paymentTransaction;
+                if (paymentTransaction.type.value === 'CAPTURE') {
+                    amountPaid += paymentTransaction.amount.value;
+                    if (amountPaid > orderTotal) {
+                        amountPaid = orderTotal;
                     }
+                } else if (paymentTransaction.type.value === 'CREDIT') {
+                    amountPaid -= paymentTransaction.amount.value;
                 }
-                var Order = require('dw/order/Order');
-                if (amountPaid === orderTotal) {
-                    order.setPaymentStatus(Order.PAYMENT_STATUS_PAID);
-                } else if (amountPaid >= 0.01) {
-                    order.setPaymentStatus(Order.PAYMENT_STATUS_PARTPAID);
-                } else {
-                    order.setPaymentStatus(Order.PAYMENT_STATUS_NOTPAID);
-                    OrderMgr.cancelOrder(order);
-                }
-            }catch(e){
-                var a =e ;
-                var b= e;
             }
-
-
+            var Order = require('dw/order/Order');
+            if (amountPaid === orderTotal) {
+                order.setPaymentStatus(Order.PAYMENT_STATUS_PAID);
+            } else if (amountPaid >= 0.01) {
+                order.setPaymentStatus(Order.PAYMENT_STATUS_PARTPAID);
+            } else {
+                order.setPaymentStatus(Order.PAYMENT_STATUS_NOTPAID);
+                OrderMgr.cancelOrder(order);
+            }
         });
-
     },
 
-    getYuansferToken: function () {
+    // Get Yuansfer token from custom preference
+    getYuansferToken: function() {
         return require('dw/system/Site').current.preferences.custom.yuansferToken;
     },
 
-    getYuansferStoreNo: function () {
+    // Get Yuansfer store number from custom preference
+    getYuansferStoreNo: function() {
         return require('dw/system/Site').current.preferences.custom.yuansferStoreNo;
     },
 
-    getYuansferMerchantNo: function () {
+    // Get Yuansfer merchant number from custom preference
+    getYuansferMerchantNo: function() {
         return require('dw/system/Site').current.preferences.custom.yuansferMerchantNo;
     },
-    isYuansferEnabled: function () {
+
+    // Get Yuansfer enable status from custom preference
+    isYuansferEnabled: function() {
         var Site = require('dw/system/Site');
         return Site.current.preferences.custom.yuansferEnable;
-    }
-
+    },
 };
 
 /*
  * Module exports
  */
-
 module.exports = YuansferHelper;
