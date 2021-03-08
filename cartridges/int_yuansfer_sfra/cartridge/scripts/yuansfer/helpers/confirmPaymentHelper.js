@@ -9,6 +9,7 @@
 const Transaction = require('dw/system/Transaction');
 const Logger = require('dw/system/Logger');
 const OrderMgr = require('dw/order/OrderMgr');
+var COHelpers = require('*/cartridge/scripts/checkout/checkoutHelpers');
 
 exports.processIncomingNotification = function(params) {
     var json = params;
@@ -32,7 +33,9 @@ exports.processIncomingNotification = function(params) {
             order.custom.yuansferTransactionNo = json.transactionNo;
             order.setPaymentStatus(Order.PAYMENT_STATUS_PAID);
             order.setExportStatus(Order.EXPORT_STATUS_READY);
-
+            if (order.getCustomerEmail()) {
+                COHelpers.sendConfirmationEmail(order, "en_US");
+            }
             return true;
         });
 

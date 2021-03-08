@@ -12,7 +12,7 @@ var _redirectUrl = document.getElementById('yuansfer_home_show').value;
  * @param {string} contents
  * @param {string} token
  */
-function calculateVerifySign(contents, token) {
+function calculateVerifySign(contents) {
     // 1.sort parameter，connect them with a=1&b=2.. format
     var sortArray = [];
 

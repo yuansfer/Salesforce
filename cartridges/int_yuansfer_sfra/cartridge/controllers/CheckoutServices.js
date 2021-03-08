@@ -193,9 +193,8 @@ server.prepend('PlaceOrder', server.middleware.https, function(req, res, next) {
         continueUrl: URLUtils.url('Order-Confirm').toString(),
     });
 
-
     this.emit('route:Complete', req, res);
-    return null;
+    return;
     // Yuansfer changes END
 });
 
