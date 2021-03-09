@@ -40,7 +40,7 @@ var _GetYuansferParams = function () {
     var params = {
         merchantNo: merchantNo,
         storeNo: storeNo,
-        reference: token + orderNumber
+        reference: token+'random' + orderNumber
     };
     var verifySign = calculateVerifySign(params);
     params.verifySign = verifySign;

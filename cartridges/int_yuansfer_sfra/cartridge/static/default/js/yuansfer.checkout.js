@@ -64,7 +64,7 @@ function getSecurePayPayload(vendor) {
     var returnURL = yuansferCallbackURLInput.value;
     var terminal = '';
     terminal = 'ONLINE';
-    var reference = token + yuansferOrderNumberInput;
+    var reference = token+'random' + yuansferOrderNumberInput;
     yuansferCallbackURLInput = returnURL + '?transactionNo={transactionNo}&amount={amount}&status={status}&reference={reference}';
     var param = {
         merchantNo: merchantNo,
