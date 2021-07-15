@@ -3,7 +3,6 @@
 'use strict';
 
 var server = require('server');
-
 var page = module.superModule;
 server.extend(page);
 
@@ -12,7 +11,6 @@ server.prepend('PlaceOrder', server.middleware.https, function(req, res, next) {
     if (!yuansferHelper.isYuansferEnabled()) {
         return next();
     }
-
     var BasketMgr = require('dw/order/BasketMgr');
     var Resource = require('dw/web/Resource');
     var Transaction = require('dw/system/Transaction');
@@ -22,6 +20,8 @@ server.prepend('PlaceOrder', server.middleware.https, function(req, res, next) {
     var validationHelpers = require('*/cartridge/scripts/helpers/basketValidationHelpers');
     var collections = require('*/cartridge/scripts/util/collections');
     var PaymentMgr = require('dw/order/PaymentMgr');
+    var OrderMgr = require('dw/order/OrderMgr');
+    const Order = require('dw/order/Order');
     var isYuansfer = false;
     var currentBasket = BasketMgr.getCurrentBasket();
 
@@ -147,18 +147,6 @@ server.prepend('PlaceOrder', server.middleware.https, function(req, res, next) {
     var isAPMOrder = yuansferCheckoutHelper.isAPMOrder(order);
     if (!isAPMOrder) {
         var yuansferPaymentInstrument = yuansferCheckoutHelper.getYuansferPaymentInstrument(order);
-
-        if (yuansferPaymentInstrument && order.custom.yuansferIsPaymentIntentInReview) {
-            res.json({
-                error: false,
-                orderID: order.orderNo,
-                orderToken: order.orderToken,
-                continueUrl: URLUtils.url('Order-Confirm').toString(),
-            });
-
-            this.emit('route:Complete', req, res);
-            return null;
-        }
         // Places the order
         var placeOrderResult = COHelpers.placeOrder(order);
         if (placeOrderResult.error) {
@@ -186,15 +174,33 @@ server.prepend('PlaceOrder', server.middleware.https, function(req, res, next) {
         this.emit('route:Complete', req, res);
         return null;
     }
+
+    var confirmPaymentHelper = require('*/cartridge/scripts/yuansfer/helpers/confirmPaymentHelper');
+    var json = {reference:order.orderNo,transactionNo: currentBasket.custom.yuansferTransactionNo}
+
+    Transaction.wrap(function() {
+
+        if (!order) {
+            return false;
+        }
+        if (order.status.value === Order.ORDER_STATUS_CREATED) {
+            OrderMgr.placeOrder(order);
+        }
+        order.custom.yuansferTransactionNo = json.transactionNo;
+        order.setPaymentStatus(Order.PAYMENT_STATUS_PAID);
+        order.setExportStatus(Order.EXPORT_STATUS_READY);
+        if (order.getCustomerEmail()) {
+            COHelpers.sendConfirmationEmail(order, req.locale.id);
+        }
+    });
     res.json({
         error: false,
         orderID: order.orderNo,
         orderToken: order.orderToken,
         continueUrl: URLUtils.url('Order-Confirm').toString(),
     });
-
     this.emit('route:Complete', req, res);
-    return;
+    return null;
     // Yuansfer changes END
 });
 

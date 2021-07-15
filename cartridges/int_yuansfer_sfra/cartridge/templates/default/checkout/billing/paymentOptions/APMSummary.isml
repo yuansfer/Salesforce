@@ -2,3 +2,12 @@
     <span>${Resource.msg('payment.pay.with', 'yuansfer', null)}
     ${dw.order.PaymentMgr.getPaymentMethod(payment.paymentMethod).name}</span>
 </div>
+<isif condition="${payment.paymentMethod === 'YUANSFER_ALIPAY'}">
+    <isinclude template="checkout/alipay" />
+    <iselseif condition="${payment.paymentMethod === 'YUANSFER_WECHATPAY'}"/>
+        <isinclude template="checkout/wechatpay" />
+    <iselseif condition="${payment.paymentMethod === 'YUANSFER_KAKAOPAY'}"/>
+        <isinclude template="checkout/kakaopay" />
+    <iselse/>
+</isif>
+

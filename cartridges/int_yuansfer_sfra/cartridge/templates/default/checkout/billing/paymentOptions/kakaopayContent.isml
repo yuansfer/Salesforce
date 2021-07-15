@@ -1,14 +1,14 @@
 
 <div class="tab-pane ${paymentOption.ID}-content" id="${paymentOption.ID}-content" role="tabpanel">
     <fieldset class="payment-form-fields">
-    
-    	<input type="hidden" class="form-control" name="${pdict.forms.billingForm.paymentMethod.htmlName}"
-            value="${paymentOption.ID}">
-        <input type="hidden" name="yuansfer_kakaopay_qrcode_url" id="yuansfer_kakaopay_qrcode_url">
 
-		<div class="row">
+        <input type="hidden" class="form-control" name="${pdict.forms.billingForm.paymentMethod.htmlName}"
+            value="${paymentOption.ID}"/>
+
+        <div class="row">
             <div class="col-12">
-            	<p>${Resource.msg('kakaopay.qrcodemessage', 'yuansfer',null)}</p>
+                <p class="payment_mobile_to_hide">${Resource.msg('kakaopay.mobile.completeyourorder', 'yuansfer',null)}</p>
+                <p class="payment_desktop_to_hide">${Resource.msg('kakaopay.paymentmessage', 'yuansfer',null)}</p>
             </div>
         </div>
     </fieldset>

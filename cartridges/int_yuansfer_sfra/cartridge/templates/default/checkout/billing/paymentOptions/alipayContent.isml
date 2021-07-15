@@ -1,13 +1,14 @@
+<isset name="isMobile" value="${require('/js/isMobile.js')}" scope="page"/>
 <div class="tab-pane ${paymentOption.ID}-content" id="${paymentOption.ID}-content" role="tabpanel">
     <fieldset class="payment-form-fields">
-    
-    	<input type="hidden" class="form-control" name="${pdict.forms.billingForm.paymentMethod.htmlName}"
-            value="${paymentOption.ID}" name=>
-        <input type="hidden" name="yuansfer_alipay_qrcode_url" id="yuansfer_alipay_qrcode_url">
 
-		<div class="row">
+        <input type="hidden" class="form-control" name="${pdict.forms.billingForm.paymentMethod.htmlName}"
+            value="${paymentOption.ID}"/>
+
+        <div class="row">
             <div class="col-12">
-            	<p>${Resource.msg('alipay.qrcodemessage', 'yuansfer',null)}</p>
+                <p class="payment_mobile_to_hide">${Resource.msg('alipay.mobile.completeyourorder', 'yuansfer',null)}</p>
+                <p class="payment_desktop_to_hide">${Resource.msg('alipay.paymentmessage', 'yuansfer',null)}</p>
             </div>
         </div>
     </fieldset>

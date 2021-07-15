@@ -44,7 +44,7 @@ var YuansferHelper = {
 
             // Loop through the payment instruments
             for (var i = 0; i < paymentInstruments.length; i++) {
-                if (this.isYuansferItem(paymentInstruments[i].paymentMethod) && !this.containsObject(item, data)) {
+                if (this.isYuansferItem(this.getProcessorId(paymentInstruments[i])) && !this.containsObject(item, data)) {
                     data.push(item);
                 }
             }
@@ -162,11 +162,11 @@ var YuansferHelper = {
 
         // Return true only if conditions are met
         var condition1 = (tid && transactionNo === tid) || !tid;
-        var condition2 = this.isYuansferItem(paymentInstrument.paymentMethod);
+        // var condition2 = this.isYuansferItem(paymentInstrument.paymentMethod);
         var condition3 = this.isYuansferItem(this.getProcessorId(paymentInstrument));
         var condition5 = paymentTransaction.custom.yuansferOrderNumber && paymentTransaction.custom.yuansferOrderNumber !== '';
 
-        if (condition1 && condition2 && condition3 && condition5) {
+        if (condition1 && condition3 && condition5) {
             return true;
         }
 
@@ -180,7 +180,7 @@ var YuansferHelper = {
      */
     isYuansferItem: function(item) {
         return item.length > 0 && (item.indexOf('YUANSFER_WECHATPAY') >= 0 || item.indexOf('YUANSFER_ALIPAY') >= 0 || item.indexOf('YUANSFER_KAKAOPAY') >= 0 || item.indexOf('YUANSFER_GCASH') >= 0
-        || item.indexOf('YUANSFER_ALIPAYHK') >= 0 || item.indexOf('YUANSFER_DANA') >= 0 || item.indexOf('YUANSFER_CREDITCARD') >= 0 || item.indexOf('YUANSFER_APM') >= 0 || item.indexOf('YUANSFER_PAYPAL') >= 0);
+        || item.indexOf('YUANSFER_ALIPAYHK') >= 0 || item.indexOf('YUANSFER_DANA') >= 0 || item.indexOf('CREDIT_CARD') >= 0 || item.indexOf('YUANSFER_APM') >= 0 || item.indexOf('YUANSFER_PAYPAL') >= 0);
     },
 
     /**

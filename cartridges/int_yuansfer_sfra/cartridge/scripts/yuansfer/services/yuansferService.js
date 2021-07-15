@@ -80,7 +80,7 @@ function getYuansferServiceDefinition() {
         createRequest: function(svc, requestObject) {
             svc.addHeader('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8');
 
-            var URL = 'https://mapi.yuansfer.yunkeguan.com';
+            var URL = svc.configuration.credential.URL;
 
             URL += requestObject.endpoint;
 
@@ -112,10 +112,12 @@ function getYuansferServiceDefinition() {
             return JSON.parse(httpClient.text);
         },
 
-        mockCall: function(svc) {
-            var mockResponsesHelper = require('./mockResponsesHelper');
+        getRequestLogMessage: function(request) {
+            return request;
+        },
 
-            return mockResponsesHelper.getMockedResponse(svc);
+        getResponseLogMessage: function(response) {
+            return response.text;
         },
     });
 }

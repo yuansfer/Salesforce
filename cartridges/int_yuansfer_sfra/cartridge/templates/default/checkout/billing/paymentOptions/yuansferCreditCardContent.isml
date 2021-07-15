@@ -1,0 +1,9 @@
+
+<input type="hidden" class="form-control" name="${pdict.forms.billingForm.paymentMethod.htmlName}"
+    value="${paymentOption.ID}"/>
+<div class="row">
+    <div class="col-12">
+        <p class="payment_mobile_to_hide">${Resource.msg('creditcard.mobile.completeyourorder', 'yuansfer',null)}</p>
+        <p class="payment_desktop_to_hide">${Resource.msg('creditcard.paymentmessage', 'yuansfer',null)}</p>
+    </div>
+</div>

@@ -5,14 +5,6 @@
             "script": "./cartridge/scripts/loadYuansfer"
         },
         {
-            "name": "app.payment.processor.yuansfer_credit",
-            "script": "./cartridge/scripts/hooks/payment/processor/yuansfer_credit"
-        },
-        {
-            "name": "app.payment.form.processor.yuansfer_credit",
-            "script": "./cartridge/scripts/hooks/payment/processor/yuansfer_credit"
-        },
-        {
             "name": "app.payment.processor.yuansfer_apm",
             "script": "./cartridge/scripts/hooks/payment/processor/yuansfer_apm"
         },

@@ -60,62 +60,30 @@ exports.SearchTransaction = searchTransaction;
 /**
  * Entry point for handling payment creation and confirmation AJAX calls.
  * @param {Object} params - parameter object
+ * @param {boolean} isMobile - device type
  * @return {Object} responsePayload.
  */
-function beforePaymentAuthorization(params) {
+function beforePaymentAuthorization(params, isMobile) {
+
     var BasketMgr = require('dw/order/BasketMgr');
     var Transaction = require('dw/system/Transaction');
     var responsePayload;
     var checkoutHelper = require('*/cartridge/scripts/yuansfer/helpers/checkoutHelper');
+    var basketCalculationHelpers = require('*/cartridge/scripts/helpers/basketCalculationHelpers');
     try {
         var basket = BasketMgr.getCurrentBasket();
         if (basket) {
+
             var yuansferPaymentInstrument = checkoutHelper.getYuansferPaymentInstrument(basket);
             if (yuansferPaymentInstrument) {
                 responsePayload = checkoutHelper.createSecurePay(params);
-                let paymentMethod = yuansferPaymentInstrument.paymentMethod;
-                if (paymentMethod === 'YUANSFER_WECHATPAY') {
-                    Transaction.wrap(function() {
-                        basket.custom.yuansferWeChatPayQRCodeURL = responsePayload.result.cashierUrl;
-                        basket.custom.yuansferIsPaymentInReview = true;
-                    });
-                } else if (paymentMethod === 'YUANSFER_CREDITCARD') {
-                    // 跳转到yuasnfer 信用卡收银台支付
-                    Transaction.wrap(function() {
-                        basket.custom.yuansferCreditCardQRCodeURL = responsePayload.result.cashierUrl;
-                        basket.custom.yuansferIsPaymentInReview = true;
-                    });
-                } else if (paymentMethod === 'YUANSFER_ALIPAY') {
-                    Transaction.wrap(function() {
-                        basket.custom.yuansferAlipayQRCodeURL = responsePayload.result.cashierUrl;
-                        basket.custom.yuansferIsPaymentInReview = true;
-                    });
-                } else if (paymentMethod === 'YUANSFER_KAKAOPAY') {
-                    Transaction.wrap(function() {
-                        basket.custom.yuansferKakaoPayQRCodeURL = responsePayload.result.cashierUrl;
-                        basket.custom.yuansferIsPaymentInReview = true;
-                    });
-                } else if (paymentMethod === 'YUANSFER_ALIPAYHK') {
-                    Transaction.wrap(function() {
-                        basket.custom.yuansferAlipayHKQRCodeURL = responsePayload.result.cashierUrl;
-                        basket.custom.yuansferIsPaymentInReview = true;
-                    });
-                } else if (paymentMethod === 'YUANSFER_GCASH') {
-                    Transaction.wrap(function() {
-                        basket.custom.yuansferGCashQRCodeURL = responsePayload.result.cashierUrl;
-                        basket.custom.yuansferIsPaymentInReview = true;
-                    });
-                } else if (paymentMethod === 'YUANSFER_DANA') {
-                    Transaction.wrap(function() {
-                        basket.custom.yuansferDanaQRCodeURL = responsePayload.result.cashierUrl;
-                        basket.custom.yuansferIsPaymentInReview = true;
-                    });
-                } else if (paymentMethod === 'YUANSFER_PAYPAL') {
-                    Transaction.wrap(function() {
-                        basket.custom.yuansferPaypalQRCodeURL = responsePayload.result.cashierUrl;
-                        basket.custom.yuansferIsPaymentInReview = true;
-                    });
-                }
+                Transaction.wrap(function() {
+                    if (isMobile === 'true') {
+                        basket.custom.isMobile = true;
+                    } else {
+                        basket.custom.isMobile = false;
+                    }
+                });
             }
         }
     } catch (e) {

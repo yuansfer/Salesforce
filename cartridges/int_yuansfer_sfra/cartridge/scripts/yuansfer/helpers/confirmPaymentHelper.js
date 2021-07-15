@@ -18,9 +18,8 @@ exports.processIncomingNotification = function(params) {
             if (json == null || json.transactionNo == null) {
                 return false;
             }
-            var yuansferHelper = require('*/cartridge/scripts/yuansfer/helpers/yuansferHelper');
-            var token = yuansferHelper.getYuansferToken();
-            var orderId = json.reference.replace(token+'random', '');
+            var orderId = json.reference.split('-')[0];
+
             var order = OrderMgr.searchOrder('orderNo={0}', orderId);
             const Order = require('dw/order/Order');
             if (!order) {
@@ -29,12 +28,11 @@ exports.processIncomingNotification = function(params) {
             if (order.status.value === Order.ORDER_STATUS_CREATED) {
                 OrderMgr.placeOrder(order);
             }
-            order.custom.yuansferIsPaymentInReview = false; // eslint-disable-line no-param-reassign
             order.custom.yuansferTransactionNo = json.transactionNo;
             order.setPaymentStatus(Order.PAYMENT_STATUS_PAID);
             order.setExportStatus(Order.EXPORT_STATUS_READY);
             if (order.getCustomerEmail()) {
-                COHelpers.sendConfirmationEmail(order, "en_US");
+                COHelpers.sendConfirmationEmail(order, req.locale.id);
             }
             return true;
         });

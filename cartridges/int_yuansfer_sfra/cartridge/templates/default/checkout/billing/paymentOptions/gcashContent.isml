@@ -1,13 +1,13 @@
 <div class="tab-pane ${paymentOption.ID}-content" id="${paymentOption.ID}-content" role="tabpanel">
     <fieldset class="payment-form-fields">
-    
-    	<input type="hidden" class="form-control" name="${pdict.forms.billingForm.paymentMethod.htmlName}"
-            value="${paymentOption.ID}">
-        <input type="hidden" name="yuansfer_gcash_qrcode_url" id="yuansfer_gcash_qrcode_url">
 
-		<div class="row">
+        <input type="hidden" class="form-control" name="${pdict.forms.billingForm.paymentMethod.htmlName}"
+            value="${paymentOption.ID}"/>
+
+        <div class="row">
             <div class="col-12">
-            	<p>${Resource.msg('gcash.qrcodemessage', 'yuansfer',null)}</p>
+                <p class="payment_mobile_to_hide">${Resource.msg('gcash.mobile.completeyourorder', 'yuansfer',null)}</p>
+                <p class="payment_desktop_to_hide">${Resource.msg('gcash.paymentmessage', 'yuansfer',null)}</p>
             </div>
         </div>
     </fieldset>

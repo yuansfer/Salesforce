@@ -11,12 +11,12 @@
 	</menuitem>
 
 	<menuaction id="yuansfer_site_order" menupath="yuansfer_site" position="9999" site="true">
-		<name xml:lang="x-default">Yuansfer transactions</name>
+		<name xml:lang="x-default">Yuansfer Transactions</name>
 		<short_description xml:lang="x-default">
-			Manage the Yuansfer transactions
+			Manage the Yuansfer Transactions
 		</short_description>
 		<description xml:lang="x-default">
-			Manage the Yuansfer transactions
+			Manage the Yuansfer Transactions
 		</description>
 		<exec pipeline="YuansferBM" node="ListTransactions" />
 		<sub-pipelines>

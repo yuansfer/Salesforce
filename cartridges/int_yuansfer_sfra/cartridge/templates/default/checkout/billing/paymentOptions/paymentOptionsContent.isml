@@ -2,56 +2,69 @@
 <isset name="yuansferHelper" value="${require('*/cartridge/scripts/yuansfer/helpers/yuansferHelper')}" scope="page" />
 <isset name="yuansferEnabled" value="${yuansferHelper.isYuansferEnabled()}" scope="page" />
 <isset name="yuansferService" value="${require('*/cartridge/scripts/yuansfer/services/yuansferService')}" scope="page" />
+<input type="hidden" id="yuansfer_trans_query_url" value="${URLUtils.https('YuansferPayments-TransactionQuery')}" />
+<input type="hidden" id="yuansfer_handle_confirm_url" value="${URLUtils.https('YuansferPayments-HandleConfirm')}" />
 
 <isif condition="${yuansferEnabled}">
     <isscript>
         var assets = require('*/cartridge/scripts/assets.js');
         assets.addJs('/js/md5.js');
-    </isscript>
-    <isscript>
-        var assets = require('*/cartridge/scripts/assets.js');
+        assets.addJs('/js/qrcode.js');
         assets.addJs('/js/yuansfer.checkout.js');
+        assets.addJs('/js/isMobile.js');
     </isscript>
 </isif>
 
 <input type="hidden" id="beforePaymentAuthURL" value="${URLUtils.https('YuansferPayments-BeforePaymentAuthorization')}" />
-<input type="hidden" id="getYuansferOrderItemsURL" value="${URLUtils.https('YuansferPayments-GetYuansferOrderItems')}" />
+<input type="hidden" id="handlePriceChangeURL" value="${URLUtils.https('YuansferPayments-HandlePriceChange')}" />
 <input type="hidden" id="billingPageUrl" value="${URLUtils.url('Checkout-Begin', 'stage', 'payment')}" />
 
 <isset name="yuansferOrder" value="${require('*/cartridge/scripts/yuansfer/helpers/checkoutHelper').getYuansferOrderDetails(dw.order.BasketMgr.getCurrentBasket())}" scope="page" />
 
-<input type="hidden" id="yuansfer_order_amount" value="${yuansferOrder.amount}">
-<input type="hidden" id="yuansfer_order_currency" value="${yuansferOrder.currency}">
-<input type="hidden" id="yuansfer_site_id" value="${require('*/cartridge/scripts/yuansfer/helpers/checkoutHelper').getSiteID()}">
-<input type="hidden" id="yuansfer_order_number" value="${require('*/cartridge/scripts/yuansfer/helpers/checkoutHelper').getNewYuansferOrderNumber()}">
-<input type="hidden" id="yuansfer_callback_url" value="${URLUtils.https("YuansferPayments-ConfirmPayment")}">
-<input type="hidden" id="yuansfer_home_url" value="${URLUtils.https("Home-Show")}">
-<input type="hidden" id="yuansfer_return_url_in_checkout" value="${URLUtils.https("YuansferPayments-HandleAPM")}">
-
-<input type="hidden" id="yuansfer_order_items" value="${yuansferOrder.order_items}">
-
+<input type="hidden" id="yuansfer_order_amount" value="${yuansferOrder.amount}"/>
+<input type="hidden" id="yuansfer_order_currency" value="${yuansferOrder.currency}"/>
+<input type="hidden" id="yuansfer_site_id" value="${require('*/cartridge/scripts/yuansfer/helpers/checkoutHelper').getSiteID()}"/>
+<input type="hidden" id="yuansfer_order_number" value="${require('*/cartridge/scripts/yuansfer/helpers/checkoutHelper').getNewYuansferOrderNumber()}"/>
+<input type="hidden" id="yuansfer_return_url_in_checkout" value="${URLUtils.https("YuansferPayments-HandleAPM")}"/>
+<input type="hidden" id="yuansfer_order_items" value="${yuansferOrder.order_items}"/>
 
 <isloop items="${pdict.order.billing.payment.applicablePaymentMethods}" var="paymentOption">
-
     <isif condition="${paymentOption.ID === 'CREDIT_CARD'}">
-        <isinclude template="checkout/billing/paymentOptions/creditCardContent" />  
-    <iselseif condition="${paymentOption.ID === 'YUANSFER_ALIPAY'}"/>
-        <isinclude template="checkout/billing/paymentOptions/alipayContent" />
-	<iselseif condition="${paymentOption.ID === 'YUANSFER_WECHATPAY'}"/>
-        <isinclude template="checkout/billing/paymentOptions/wechatpayContent" />
-    <iselseif condition="${paymentOption.ID === 'YUANSFER_GCASH'}"/>
-        <isinclude template="checkout/billing/paymentOptions/gcashContent" />
-    <iselseif condition="${paymentOption.ID === 'YUANSFER_DANA'}"/>
-        <isinclude template="checkout/billing/paymentOptions/danaContent" />
-    <iselseif condition="${paymentOption.ID === 'YUANSFER_ALIPAYHK'}"/>
-        <isinclude template="checkout/billing/paymentOptions/alipayhkContent" />
-    <iselseif condition="${paymentOption.ID === 'YUANSFER_KAKAOPAY'}"/>
-        <isinclude template="checkout/billing/paymentOptions/kakaopayContent" />
-    <iselseif condition="${paymentOption.ID === 'YUANSFER_CREDITCARD'}"/>
-        <isinclude template="checkout/billing/paymentOptions/creditcardContent" />
-    <iselseif condition="${paymentOption.ID === 'YUANSFER_PAYPAL'}"/>
-        <isinclude template="checkout/billing/paymentOptions/paypalContent" />
-    <iselse/>
+        <isinclude template="checkout/billing/paymentOptions/creditCardContent" />
+    <iselseif condition="${yuansferEnabled}"/>
+        <isif condition="${paymentOption.ID === 'YUANSFER_CREDITCARD'}">
+            <div class="tab-pane active ${paymentOption.ID}-content" id="${paymentOption.ID}-content" role="tabpanel">
+                <fieldset class="payment-form-fields">
 
+                    <!--- payment method is credit card --->
+                    <input type="hidden" class="form-control"
+                        name="${pdict.forms.billingForm.paymentMethod.htmlName}"
+                        value="${paymentOption.ID}"
+                    />
+                    <input type="hidden" name="cardNumber" value="" class="cardNumber" id="cardNumber"/>
+                    <input type="hidden" name="yuansfer_source_id" id="yuansfer_source_id"/>
+                    <isinclude template="checkout/billing/paymentOptions/yuansferCreditCardContent" />
+                </fieldset>
+            </div>
+        <iselseif condition="${paymentOption.ID === 'YUANSFER_ALIPAY'}"/>
+            <isinclude template="checkout/billing/paymentOptions/alipayContent" />
+        <iselseif condition="${paymentOption.ID === 'YUANSFER_WECHATPAY'}"/>
+            <isinclude template="checkout/billing/paymentOptions/wechatpayContent" />
+        <iselseif condition="${paymentOption.ID === 'YUANSFER_GCASH'}"/>
+            <isinclude template="checkout/billing/paymentOptions/gcashContent" />
+        <iselseif condition="${paymentOption.ID === 'YUANSFER_DANA'}"/>
+            <isinclude template="checkout/billing/paymentOptions/danaContent" />
+        <iselseif condition="${paymentOption.ID === 'YUANSFER_ALIPAYHK'}"/>
+            <isinclude template="checkout/billing/paymentOptions/alipayhkContent" />
+        <iselseif condition="${paymentOption.ID === 'YUANSFER_KAKAOPAY'}"/>
+            <isinclude template="checkout/billing/paymentOptions/kakaopayContent" />
+        <iselseif condition="${paymentOption.ID === 'YUANSFER_PAYPAL'}"/>
+            <isinclude template="checkout/billing/paymentOptions/paypalContent" />
+        <iselseif condition="${paymentOption.ID === 'YUANSFER_UNIONPAY'}"/>
+            <isinclude template="checkout/billing/paymentOptions/unionpayContent" />
+        <iselseif condition="${paymentOption.ID === 'YUANSFER_VENMO'}"/>
+            <isinclude template="checkout/billing/paymentOptions/venmoContent" />
+        </isif>
     </isif>
 </isloop>
+

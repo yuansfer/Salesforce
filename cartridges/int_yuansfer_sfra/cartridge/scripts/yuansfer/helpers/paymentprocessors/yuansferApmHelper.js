@@ -16,14 +16,7 @@ function Handle(args) {
     const checkoutHelper = require('*/cartridge/scripts/yuansfer/helpers/checkoutHelper');
     const paramsMap = request.httpParameterMap;
     const selectedPaymentMethodID = paramsMap.dwfrm_billing_paymentMethods_selectedPaymentMethodID.stringValue || paramsMap.dwfrm_billing_paymentMethod.stringValue;// app.getForm('billing').object.paymentMethods.selectedPaymentMethodID.value;
-    const params = {
-        yuansferWeChatPayQRCodeURL: paramsMap.yuansfer_wechat_qrcode_url.stringValue,
-        yuansferAlipayQRCodeURL: paramsMap.yuansfer_alipay_qrcode_url.stringValue,
-        yuansferDanaQRCodeURL: paramsMap.yuansfer_dana_qrcode_url.stringValue,
-        yuansferAlipayHKQRCodeURL: paramsMap.yuansfer_alipayhk_qrcode_url.stringValue,
-        yuansferGCashQRCodeURL: paramsMap.yuansfer_gcash_qrcode_url.stringValue,
-        yuansferKakaoPayQRCodeURL: paramsMap.yuansfer_KakaoPay_qrcode_url.stringValue,
-    };
+    const params = {};
 
     try {
         Transaction.begin();

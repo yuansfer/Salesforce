@@ -3,6 +3,7 @@
 /* global session, dw, empty */
 
 'use strict';
+
 /**
  * Checks if Yuansfer integration for card payments is enabled.
  *
@@ -111,12 +112,10 @@ exports.createYuansferPaymentInstrument = function(lineItemCtnr, paymentMethodId
         paymentInstrument.paymentTransaction.setType(PaymentTransaction.TYPE_CAPTURE);
     }
 
-    if (paymentInstrument) {
-        delete lineItemCtnr.custom.yuansferIsPaymentInReview; // eslint-disable-line
-    }
 };
 
 exports.createSecurePay = function(params) {
+
     const yuansferService = require('*/cartridge/scripts/yuansfer/services/yuansferService');
 
     const securePay = yuansferService.securePay.create(params);
@@ -216,7 +215,6 @@ exports.createOrder = function(currentBasket) {
     try {
         order = Transaction.wrap(function() {
             var newOrder;
-
             if (yuansferOrderNumber) {
                 newOrder = OrderMgr.createOrder(currentBasket, yuansferOrderNumber);
             } else {
@@ -352,158 +350,6 @@ exports.getShippingOptions = function() {
 };
 
 /**
- * Get WeChat QR Code URL by Order Number
- * @param {Integer} orderNumber to get QR Code URL
- * @returns {string} WeChat QR Code URL
- */
-exports.getWeChatPayQRCodeURL = function(orderNumber) {
-    const OrderMgr = require('dw/order/OrderMgr');
-    var orderToken = session.privacy.yuansferOrderToken;
-    var order = null;
-    if (orderToken) {
-        order = OrderMgr.getOrder(orderNumber);
-    } else {
-        order = OrderMgr.searchOrder('orderNo={0}', orderNumber);
-    }
-
-    delete session.privacy.yuansferOrderToken;
-    return !empty(order) ? order.custom.yuansferWeChatPayQRCodeURL : '';
-};
-
-/**
- * Get Alipay QR Code URL by Order Number
- * @param {Integer} orderNumber to get QR Code URL
- * @returns {string} Alipay QR Code URL
- */
-exports.getAlipayQRCodeURL = function(orderNumber) {
-    const OrderMgr = require('dw/order/OrderMgr');
-    var orderToken = session.privacy.yuansferOrderToken;
-    var order = null;
-    if (orderToken) {
-        order = OrderMgr.getOrder(orderNumber);
-    } else {
-        order = OrderMgr.searchOrder('orderNo={0}', orderNumber);
-    }
-
-    delete session.privacy.yuansferOrderToken;
-    return !empty(order) ? order.custom.yuansferAlipayQRCodeURL : '';
-};
-
-/**
- * Get Kakao Pay QR Code URL by Order Number
- * @param {Integer} orderNumber to get QR Code URL
- * @returns {string} KakaoPay QR Code URL
- */
-exports.getKakaoPayCodeURL = function(orderNumber) {
-    const OrderMgr = require('dw/order/OrderMgr');
-    var orderToken = session.privacy.yuansferOrderToken;
-    var order = null;
-    if (orderToken) {
-        order = OrderMgr.getOrder(orderNumber);
-    } else {
-        order = OrderMgr.searchOrder('orderNo={0}', orderNumber);
-    }
-
-    delete session.privacy.yuansferOrderToken;
-    return !empty(order) ? order.custom.yuansferKakaoPayQRCodeURL : '';
-};
-
-/**
- * Get Dana QR Code URL by Order Number
- * @param {Integer} orderNumber to get QR Code URL
- * @returns {string} Dana QR Code URL
- */
-exports.getDanaQRCodeURL = function(orderNumber) {
-    const OrderMgr = require('dw/order/OrderMgr');
-    var orderToken = session.privacy.yuansferOrderToken;
-    var order = null;
-    if (orderToken) {
-        order = OrderMgr.getOrder(orderNumber);
-    } else {
-        order = OrderMgr.searchOrder('orderNo={0}', orderNumber);
-    }
-
-    delete session.privacy.yuansferOrderToken;
-    return !empty(order) ? order.custom.yuansferDanaQRCodeURL : '';
-};
-
-/**
- * Get GCash QR Code URL by Order Number
- * @param {Integer} orderNumber to get QR Code URL
- * @returns {string} GCash QR Code URL
- */
-exports.getGCashQRCodeURL = function(orderNumber) {
-    const OrderMgr = require('dw/order/OrderMgr');
-    var orderToken = session.privacy.yuansferOrderToken;
-    var order = null;
-    if (orderToken) {
-        order = OrderMgr.getOrder(orderNumber);
-    } else {
-        order = OrderMgr.searchOrder('orderNo={0}', orderNumber);
-    }
-
-    delete session.privacy.yuansferOrderToken;
-    return !empty(order) ? order.custom.yuansferGCashQRCodeURL : '';
-};
-
-/**
- * Get HK Alipay QR Code URL by Order Number
- * @param {Integer} orderNumber to get QR Code URL
- * @returns {string} HK Alipay QR Code URL
- */
-exports.getAlipayHKQRCodeURL = function(orderNumber) {
-    const OrderMgr = require('dw/order/OrderMgr');
-    var orderToken = session.privacy.yuansferOrderToken;
-    var order = null;
-    if (orderToken) {
-        order = OrderMgr.getOrder(orderNumber);
-    } else {
-        order = OrderMgr.searchOrder('orderNo={0}', orderNumber);
-    }
-
-    delete session.privacy.yuansferOrderToken;
-    return !empty(order) ? order.custom.yuansferAlipayHKQRCodeURL : '';
-};
-
-/**
- * Get Credit Card QR Code URL by Order Number
- * @param {Integer} orderNumber to get QR Code URL
- * @returns {string} credit Card QR Code URL
- */
-exports.getCreditCardQRCodeURL = function(orderNumber) {
-    const OrderMgr = require('dw/order/OrderMgr');
-    var orderToken = session.privacy.yuansferOrderToken;
-    var order = null;
-    if (orderToken) {
-        order = OrderMgr.getOrder(orderNumber);
-    } else {
-        order = OrderMgr.searchOrder('orderNo={0}', orderNumber);
-    }
-
-    delete session.privacy.yuansferOrderToken;
-    return !empty(order) ? order.custom.yuansferCreditCardQRCodeURL : '';
-};
-
-/**
- * Get Paypal QR Code URL by Order Number
- * @param {Integer} orderNumber to get QR Code URL
- * @returns {string} Paypal QR Code URL
- */
-exports.getPaypalQRCodeURL = function(orderNumber) {
-    const OrderMgr = require('dw/order/OrderMgr');
-    var orderToken = session.privacy.yuansferOrderToken;
-    var order = null;
-    if (orderToken) {
-        order = OrderMgr.getOrder(orderNumber);
-    } else {
-        order = OrderMgr.searchOrder('orderNo={0}', orderNumber);
-    }
-
-    delete session.privacy.yuansferOrderToken;
-    return !empty(order) ? order.custom.yuansferPaypalQRCodeURL : '';
-};
-
-/**
  * Get TransactionNo by Order Number
  * @param {Integer} orderNumber to get TransactionNo
  * @returns {string} TransactionNo
@@ -513,27 +359,9 @@ exports.getTransactionNo = function(orderNumber) {
     var orderToken = session.privacy.yuansferOrderToken;
     var order = null;
     if (orderToken) {
-        order = OrderMgr.getOrder(orderNumber);
+        order = OrderMgr.getOrder(orderNumber, orderToken);
     } else {
         order = OrderMgr.searchOrder('orderNo={0}', orderNumber);
     }
     return !empty(order) ? order.custom.yuansferTransactionNo : '';
 };
-
-/**
- * Get Reference by Order Number
- * @param {Integer} orderNumber to get Reference
- * @returns {string} ReferenceNo
- */
-exports.getPaymentStatus = function(orderNumber) {
-    const OrderMgr = require('dw/order/OrderMgr');
-    var orderToken = session.privacy.yuansferOrderToken;
-    var order = null;
-    if (orderToken) {
-        order = OrderMgr.getOrder(orderNumber);
-    } else {
-        order = OrderMgr.searchOrder('orderNo={0}', orderNumber);
-    }
-    return !empty(order) ? order.custom.yuansferIsPaymentInReview : '';
-};
-
